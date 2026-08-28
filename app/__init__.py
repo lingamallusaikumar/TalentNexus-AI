@@ -17,6 +17,12 @@ def create_app(config_name=None):
     
     init_celery(app, celery)
     
+    from app.realtime.socketio import socketio
+    
+    # Use config URL if available
+    redis_url = app.config.get('REDIS_URL', 'redis://localhost:6379/0')
+    socketio.init_app(app, message_queue=redis_url)
+    
     # Register blueprints
     from app.api import api_bp
     from app.auth.routes import auth_bp

@@ -23,4 +23,8 @@ def evaluate_and_save_match(candidate, job):
     
     db.session.commit()
     
+    # Emit real-time WebSocket update
+    from app.realtime.socketio import emit_ranking_update
+    emit_ranking_update(job.id)
+    
     return match_record
