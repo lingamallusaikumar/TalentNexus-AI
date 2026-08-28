@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Top Stat Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon icon-blue"><i class="fa-solid fa-briefcase"></i></div>
+            <div class="stat-details">
+                <span class="stat-title">Active Job Openings</span>
+                <h3 class="stat-value" id="metric-active-jobs">12</h3>
+                <span class="stat-trend positive"><i class="fa-solid fa-arrow-up"></i> +2 this week</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-purple"><i class="fa-solid fa-file-invoice"></i></div>
+            <div class="stat-details">
+                <span class="stat-title">Resumes AI Screened</span>
+                <h3 class="stat-value" id="metric-screened">1,428</h3>
+                <span class="stat-trend positive"><i class="fa-solid fa-bolt"></i> Real-time parsed</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-green"><i class="fa-solid fa-bullseye"></i></div>
+            <div class="stat-details">
+                <span class="stat-title">AI Shortlisting Match Rate</span>
+                <h3 class="stat-value" id="metric-match-rate">78.4%</h3>
+                <span class="stat-trend positive"><i class="fa-solid fa-arrow-up"></i> High precision</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-orange"><i class="fa-solid fa-calendar-check"></i></div>
+            <div class="stat-details">
+                <span class="stat-title">Upcoming Interviews</span>
+                <h3 class="stat-value" id="metric-interviews">24</h3>
+                <span class="stat-trend neutral"><i class="fa-solid fa-clock"></i> Next 48 hrs</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Split: Live Match Stream & Funnel Analytics -->
+    <div class="dashboard-split">
+        <!-- Live Candidate Ranking & XAI Stream -->
+        <div class="card live-rankings-card">
+            <div class="card-header">
+                <div>
+                    <h3><i class="fa-solid fa-ranking-star"></i> Real-Time Candidate Match & XAI Stream</h3>
+                    <p class="subtitle">Live ranking recalculation powered by Sentence-Transformers & Hybrid scoring</p>
+                </div>
+                <span class="live-pulse"><span class="pulse-dot"></span> LIVE</span>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Candidate</th>
+                            <th>Target Role</th>
+                            <th>Match Score</th>
+                            <th>AI Recommendation</th>
+                            <th>XAI Strengths & Factors</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ranking-table-body">
+                        <tr>
+                            <td><span class="rank-badge gold">#1</span></td>
+                            <td>
+                                <strong>Alex Rivera</strong>
+                                <small class="text-muted d-block">Senior ML Engineer • 6 yrs exp</small>
+                            </td>
+                            <td>Lead Python Architect</td>
+                            <td><div class="score-pill score-high">94.8%</div></td>
+                            <td><span class="badge badge-success">SHORTLIST</span></td>
+                            <td><span class="xai-tag"><i class="fa-solid fa-check"></i> Matches 9/10 Skills (Python, PyTorch, Celery)</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank-badge silver">#2</span></td>
+                            <td>
+                                <strong>Sarah Chen</strong>
+                                <small class="text-muted d-block">Full Stack Developer • 4 yrs exp</small>
+                            </td>
+                            <td>Backend Engineer</td>
+                            <td><div class="score-pill score-high">88.2%</div></td>
+                            <td><span class="badge badge-success">SHORTLIST</span></td>
+                            <td><span class="xai-tag"><i class="fa-solid fa-check"></i> Strong semantic job match</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank-badge bronze">#3</span></td>
+                            <td>
+                                <strong>David Kim</strong>
+                                <small class="text-muted d-block">Software Engineer • 2 yrs exp</small>
+                            </td>
+                            <td>Backend Engineer</td>
+                            <td><div class="score-pill score-med">68.5%</div></td>
+                            <td><span class="badge badge-warning">REVIEW</span></td>
+                            <td><span class="xai-tag text-warning"><i class="fa-solid fa-triangle-exclamation"></i> Missing Docker experience</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Funnel Analytics Chart -->
+        <div class="card analytics-chart-card">
+            <div class="card-header">
+                <h3><i class="fa-solid fa-chart-column"></i> ATS Recruitment Funnel</h3>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="funnelChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

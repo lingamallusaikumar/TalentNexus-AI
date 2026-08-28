@@ -1,5 +1,9 @@
 from app.api.health import api_bp
 from app.auth.routes import auth_bp
-
-# Register blueprints to the main api_bp if necessary, or just rely on main app register
-
+from app.resumes.routes import resumes_bp
+from app.api.candidates import candidates_bp
+from app.api.jobs import jobs_bp
+from app.api.matching import matching_bp
+from app.api.applications import applications_bp
+from app.api.search import search_bp
+from app.api.analytics import analytics_bp

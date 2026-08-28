@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TalentNexus AI | Recruitment Intelligence{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-brain-circuit brand-icon"></i>
+                <h2>TalentNexus <span class="badge-ai">AI</span></h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="/" class="nav-item active"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                <a href="#jobs" class="nav-item"><i class="fa-solid fa-briefcase"></i> Job Requisitions</a>
+                <a href="#candidates" class="nav-item"><i class="fa-solid fa-users"></i> Candidate Pool</a>
+                <a href="#pipeline" class="nav-item"><i class="fa-solid fa-diagram-project"></i> ATS Pipeline</a>
+                <a href="#search" class="nav-item"><i class="fa-solid fa-magnifying-glass"></i> Semantic Search</a>
+                <a href="#analytics" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Analytics</a>
+                <a href="#workflows" class="nav-item"><i class="fa-solid fa-bolt"></i> Workflows</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-profile-widget">
+                    <div class="avatar">SA</div>
+                    <div class="user-info">
+                        <span class="name">Enterprise Admin</span>
+                        <span class="role">TalentNexus AI</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="search-bar">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="global-search" placeholder="Natural language search (e.g. 'Senior Python dev with 4+ yrs experience in ML')...">
+                </div>
+                <div class="header-actions">
+                    <span id="socket-status" class="socket-badge connected"><i class="fa-solid fa-circle"></i> Live WebSocket</span>
+                    <button class="btn btn-primary" onclick="triggerResumeUploadModal()"><i class="fa-solid fa-upload"></i> Ingest Resume</button>
+                </div>
+            </header>
+
+            <div class="content-body">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

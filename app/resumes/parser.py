@@ -1,16 +1,17 @@
 import fitz  # PyMuPDF
 import docx
 import os
+from ml.resume_parser.ocr_engine import OCREngine
 
 def extract_text_from_pdf(file_path: str) -> str:
-    text = ""
     try:
+        return OCREngine.extract_text_from_scanned_pdf(file_path)
+    except Exception:
+        text = ""
         with fitz.open(file_path) as doc:
             for page in doc:
                 text += page.get_text("text") + "\n"
-    except Exception as e:
-        raise ValueError(f"Failed to read PDF: {str(e)}")
-    return text
+        return text
 
 def extract_text_from_docx(file_path: str) -> str:
     text = ""
@@ -33,7 +34,7 @@ def parse_resume_file(file_path: str, file_type: str) -> str:
     elif file_type in ['docx', 'doc']:
         return extract_text_from_docx(file_path)
     elif file_type == 'txt':
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
             return f.read()
     else:
         raise ValueError(f"Unsupported file type: {file_type}")
