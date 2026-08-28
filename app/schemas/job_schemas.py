@@ -1,0 +1,53 @@
+from marshmallow import Schema, fields, validate
+
+class JobRequirementSchema(Schema):
+    id = fields.Integer(dump_only=True)
+    skill_name = fields.String(required=True, validate=validate.Length(min=1, max=64))
+    is_required = fields.Boolean(missing=True)
+    min_years_experience = fields.Float(validate=validate.Range(min=0.0, max=30.0), missing=1.0)
+    weight = fields.Float(validate=validate.Range(min=0.1, max=5.0), missing=1.0)
+
+class JobCreateSchema(Schema):
+    title = fields.String(required=True, validate=validate.Length(min=3, max=128))
+    department_id = fields.Integer(allow_none=True)
+    hiring_manager_id = fields.Integer(allow_none=True)
+    location = fields.String(validate=validate.Length(max=128), allow_none=True)
+    is_remote = fields.Boolean(missing=False)
+    remote_type = fields.String(validate=validate.OneOf(['ONSITE', 'HYBRID', 'FULLY_REMOTE']), missing='ONSITE')
+    employment_type = fields.String(validate=validate.OneOf(['FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERNSHIP']), missing='FULL_TIME')
+    description = fields.String(required=True, validate=validate.Length(min=20))
+    salary_min = fields.Integer(validate=validate.Range(min=0), allow_none=True)
+    salary_max = fields.Integer(validate=validate.Range(min=0), allow_none=True)
+    salary_currency = fields.String(validate=validate.Length(equal=3), missing='USD')
+    requirements = fields.Nested(JobRequirementSchema, many=True, missing=list)
+
+class JobResponseSchema(Schema):
+    id = fields.Integer()
+    organization_id = fields.Integer()
+    title = fields.String()
+    code = fields.String()
+    department_id = fields.Integer()
+    hiring_manager_id = fields.Integer()
+    location = fields.String()
+    is_remote = fields.Boolean()
+    remote_type = fields.String()
+    employment_type = fields.String()
+    description = fields.String()
+    status = fields.String()
+    salary_min = fields.Integer()
+    salary_max = fields.Integer()
+    salary_currency = fields.String()
+    description_quality_score = fields.Float()
+    inclusive_language_score = fields.Float()
+    jd_analysis = fields.Dict()
+    requirements = fields.Nested(JobRequirementSchema, many=True)
+    created_at = fields.DateTime()
+    updated_at = fields.DateTime()
+
+class JobTemplateSchema(Schema):
+    id = fields.Integer(dump_only=True)
+    name = fields.String(required=True, validate=validate.Length(min=2, max=128))
+    title = fields.String(required=True, validate=validate.Length(min=2, max=128))
+    department = fields.String(allow_none=True)
+    description = fields.String(required=True)
+    default_requirements = fields.List(fields.Dict(), missing=list)

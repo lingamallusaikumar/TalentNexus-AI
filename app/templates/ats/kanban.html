@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}ATS Pipeline Kanban Board | TalentNexus AI{% endblock %}
+
+{% block content %}
+<div class="kanban-page">
+    <div class="page-header">
+        <div>
+            <h2><i class="fa-solid fa-diagram-project"></i> Recruitment Pipeline Board</h2>
+            <p class="subtitle">Drag and move candidates across stages with automated AI workflows</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Candidate</button>
+        </div>
+    </div>
+
+    <!-- Kanban Stages Container -->
+    <div class="kanban-board">
+        <!-- Stage 1: Applied -->
+        <div class="kanban-column">
+            <div class="column-header">
+                <h4>Applied <span class="badge">4</span></h4>
+            </div>
+            <div class="kanban-cards">
+                <div class="kanban-card">
+                    <div class="card-top">
+                        <span class="cand-name">Michael Chang</span>
+                        <span class="match-badge score-high">91%</span>
+                    </div>
+                    <p class="role-target">Senior Backend Dev</p>
+                    <div class="card-footer">
+                        <span><i class="fa-solid fa-briefcase"></i> 5 yrs</span>
+                        <span class="xai-indicator"><i class="fa-solid fa-brain"></i> AI Screened</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stage 2: AI Screening -->
+        <div class="kanban-column">
+            <div class="column-header">
+                <h4>AI Screening <span class="badge">2</span></h4>
+            </div>
+            <div class="kanban-cards">
+                <div class="kanban-card">
+                    <div class="card-top">
+                        <span class="cand-name">Emily Watson</span>
+                        <span class="match-badge score-med">74%</span>
+                    </div>
+                    <p class="role-target">Full Stack Engineer</p>
+                    <div class="card-footer">
+                        <span><i class="fa-solid fa-clock"></i> Parsing resume...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stage 3: Shortlisted -->
+        <div class="kanban-column">
+            <div class="column-header">
+                <h4>Shortlisted <span class="badge">3</span></h4>
+            </div>
+            <div class="kanban-cards">
+                <div class="kanban-card">
+                    <div class="card-top">
+                        <span class="cand-name">Alex Rivera</span>
+                        <span class="match-badge score-high">95%</span>
+                    </div>
+                    <p class="role-target">Lead ML Architect</p>
+                    <div class="card-footer">
+                        <span class="text-success"><i class="fa-solid fa-check-double"></i> Ready for Interview</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stage 4: Interview -->
+        <div class="kanban-column">
+            <div class="column-header">
+                <h4>Interview <span class="badge">2</span></h4>
+            </div>
+            <div class="kanban-cards">
+                <div class="kanban-card">
+                    <div class="card-top">
+                        <span class="cand-name">Sarah Chen</span>
+                        <span class="match-badge score-high">88%</span>
+                    </div>
+                    <p class="role-target">Senior Python Dev</p>
+                    <div class="card-footer">
+                        <span><i class="fa-solid fa-calendar"></i> Tomorrow, 2:00 PM</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stage 5: Offer / Hired -->
+        <div class="kanban-column">
+            <div class="column-header">
+                <h4>Offer / Hired <span class="badge">1</span></h4>
+            </div>
+            <div class="kanban-cards">
+                <div class="kanban-card card-hired">
+                    <div class="card-top">
+                        <span class="cand-name">David Vance</span>
+                        <span class="match-badge score-high">96%</span>
+                    </div>
+                    <p class="role-target">DevOps Lead</p>
+                    <div class="card-footer">
+                        <span class="badge badge-success">Offer Accepted</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
