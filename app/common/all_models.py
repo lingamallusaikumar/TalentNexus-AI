@@ -6,5 +6,6 @@ from app.resumes.models import Resume, ResumeProcessingJob
 from app.matching.models import CandidateMatch
 from app.applications.models import Application, ApplicationHistory
 from app.interviews.models import Interview, Interviewer, InterviewFeedback
+from app.workflows.models import WorkflowRule, WorkflowExecution
 
 
