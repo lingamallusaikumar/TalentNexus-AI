@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Job Requisitions | TalentNexus AI{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2><i class="fa-solid fa-briefcase"></i> Job Requisitions</h2>
+            <p class="subtitle">Manage job descriptions, required skill weights, and active applications</p>
+        </div>
+        <a href="/jobs/new" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Create Requisition</a>
+    </div>
+
+    <div class="card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Job Title</th>
+                    <th>Location</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Quality Score</th>
+                    <th>Inclusive Score</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for j in jobs %}
+                <tr>
+                    <td><strong>{{ j.title }}</strong></td>
+                    <td>{{ j.location or 'Remote' }}</td>
+                    <td><span class="badge badge-secondary">{{ j.employment_type }}</span></td>
+                    <td><span class="badge badge-success">{{ j.status }}</span></td>
+                    <td><div class="score-pill score-high">{{ j.description_quality_score }}/100</div></td>
+                    <td><div class="score-pill score-high">{{ j.inclusive_language_score }}/100</div></td>
+                    <td>
+                        <a href="/jobs/{{ j.id }}" class="btn btn-sm btn-primary">Rankings</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

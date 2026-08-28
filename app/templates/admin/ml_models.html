@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}ML Model Registry | TalentNexus AI{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2><i class="fa-solid fa-microchip"></i> ML Model Registry & Drift Monitoring</h2>
+            <p class="subtitle">Track deployed transformer models, evaluation metrics, and score drift</p>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon icon-blue"><i class="fa-solid fa-network-wired"></i></div>
+            <div class="stat-details">
+                <span class="stat-title">Active Model</span>
+                <h3 class="stat-value">all-MiniLM-L6-v2</h3>
+                <span class="stat-trend positive">Sentence Transformers</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-purple"><i class="fa-solid fa-gauge-high"></i></div>
+            <div class="stat-details">
+                <span class="stat-title">Inference Latency P95</span>
+                <h3 class="stat-value">42 ms</h3>
+                <span class="stat-trend positive">Real-time throughput</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-green"><i class="fa-solid fa-chart-area"></i></div>
+            <div class="stat-details">
+                <span class="stat-title">Population Drift (PSI)</span>
+                <h3 class="stat-value">0.034</h3>
+                <span class="stat-trend positive"><i class="fa-solid fa-circle-check"></i> Healthy / No Drift</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

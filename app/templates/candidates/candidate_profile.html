@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ candidate.first_name }} {{ candidate.last_name }} | Dossier{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header card">
+        <div class="profile-main">
+            <div class="avatar-large">{{ candidate.first_name[:1] }}{{ candidate.last_name[:1] }}</div>
+            <div class="profile-meta">
+                <h2>{{ candidate.first_name }} {{ candidate.last_name }}</h2>
+                <p class="headline">{{ candidate.headline }}</p>
+                <div class="contact-badges">
+                    <span><i class="fa-solid fa-envelope"></i> {{ candidate.email }}</span>
+                    <span><i class="fa-solid fa-phone"></i> {{ candidate.phone or 'Not provided' }}</span>
+                    <span><i class="fa-solid fa-location-dot"></i> {{ candidate.location or 'Remote' }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="profile-score-box">
+            <span class="score-label">Resume Quality Score</span>
+            <div class="score-display">{{ candidate.resume_quality_score }}<span>/100</span></div>
+        </div>
+    </div>
+
+    <div class="profile-body-grid">
+        <!-- Left: Summary, Experience, Education -->
+        <div class="profile-details">
+            <div class="card">
+                <h3><i class="fa-solid fa-user"></i> Professional Summary</h3>
+                <p class="summary-text">{{ candidate.summary or 'No summary provided.' }}</p>
+            </div>
+
+            <div class="card">
+                <h3><i class="fa-solid fa-briefcase"></i> Work Experience</h3>
+                {% for exp in candidate.experiences %}
+                <div class="timeline-item">
+                    <h4>{{ exp.title }} <span class="company">@ {{ exp.company }}</span></h4>
+                    <span class="period">{{ exp.start_date }} - {{ exp.end_date or 'Present' }}</span>
+                    <p>{{ exp.description }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Right: Technical Skills & Notes -->
+        <div class="profile-sidebar">
+            <div class="card">
+                <h3><i class="fa-solid fa-code"></i> Technical Skills</h3>
+                <div class="skills-wrap">
+                    {% for sk in candidate.skills %}
+                    <div class="skill-tag">
+                        <strong>{{ sk.skill_name }}</strong>
+                        <span>{{ sk.years_of_experience }} yrs ({{ sk.proficiency }})</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Assessments & Tests | TalentNexus AI{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2><i class="fa-solid fa-file-circle-check"></i> Technical Assessments & Question Bank</h2>
+            <p class="subtitle">Create MCQ and coding evaluations with automated grading</p>
+        </div>
+        <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> New Assessment</button>
+    </div>
+
+    <div class="card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Assessment Title</th>
+                    <th>Time Limit</th>
+                    <th>Passing Score</th>
+                    <th>Questions</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in assessments %}
+                <tr>
+                    <td><strong>{{ a.title }}</strong></td>
+                    <td>{{ a.time_limit_minutes }} mins</td>
+                    <td>{{ a.passing_score_percentage }}%</td>
+                    <td>{{ a.questions|length }} questions</td>
+                    <td><span class="badge badge-success">Active</span></td>
+                    <td>
+                        <a href="/assessments/{{ a.id }}/take" class="btn btn-sm btn-secondary">Preview Test</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

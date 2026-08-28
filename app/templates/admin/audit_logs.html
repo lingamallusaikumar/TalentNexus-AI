@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Audit Logs | TalentNexus AI{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2><i class="fa-solid fa-shield-halved"></i> Security & Audit Trail Explorer</h2>
+            <p class="subtitle">Complete audit logs of all user mutations, AI overrides, and data access</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Action</th>
+                    <th>Resource</th>
+                    <th>IP Address</th>
+                    <th>User</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td><small>{{ log.created_at }}</small></td>
+                    <td><span class="badge badge-info">{{ log.action }}</span></td>
+                    <td>{{ log.resource_type }} #{{ log.resource_id or '' }}</td>
+                    <td><code>{{ log.ip_address or '127.0.0.1' }}</code></td>
+                    <td>{{ log.user.email if log.user else 'System / AI' }}</td>
+                    <td><small>{{ log.changes or {} }}</small></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

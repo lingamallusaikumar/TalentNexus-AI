@@ -21,7 +21,7 @@ def create_app(config_name=None):
     redis_url = app.config.get('REDIS_URL', 'redis://localhost:6379/0')
     socketio.init_app(app, message_queue=redis_url)
     
-    # Register blueprints
+    # 1. Register API Blueprints
     from app.api import (
         api_bp, auth_bp, resumes_bp, candidates_bp, 
         jobs_bp, matching_bp, applications_bp, search_bp, analytics_bp
@@ -36,6 +36,18 @@ def create_app(config_name=None):
     app.register_blueprint(applications_bp, url_prefix='/api/v1/applications')
     app.register_blueprint(search_bp, url_prefix='/api/v1/search')
     app.register_blueprint(analytics_bp, url_prefix='/api/v1/analytics')
+
+    # 2. Register Web View Blueprints
+    from app.views import (
+        auth_views_bp, job_views_bp, candidate_views_bp, 
+        ats_views_bp, admin_views_bp, assessment_views_bp
+    )
+    app.register_blueprint(auth_views_bp)
+    app.register_blueprint(job_views_bp)
+    app.register_blueprint(candidate_views_bp)
+    app.register_blueprint(ats_views_bp)
+    app.register_blueprint(admin_views_bp)
+    app.register_blueprint(assessment_views_bp)
     
     # Register error handlers and logger
     from app.common.errors import register_error_handlers

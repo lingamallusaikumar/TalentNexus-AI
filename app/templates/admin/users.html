@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}User Management | TalentNexus AI{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2><i class="fa-solid fa-users-gear"></i> Organization User Management</h2>
+            <p class="subtitle">Assign RBAC roles, enforce 2FA, and manage multi-tenant permissions</p>
+        </div>
+        <button class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> Invite User</button>
+    </div>
+
+    <div class="card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>2FA Status</th>
+                    <th>Account Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td><strong>{{ u.full_name }}</strong></td>
+                    <td>{{ u.email }}</td>
+                    <td><span class="badge badge-primary">{{ u.role.name if u.role else 'Candidate' }}</span></td>
+                    <td>
+                        {% if u.two_factor_enabled %}
+                        <span class="text-success"><i class="fa-solid fa-shield-check"></i> Enabled</span>
+                        {% else %}
+                        <span class="text-muted"><i class="fa-solid fa-shield"></i> Disabled</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if u.is_active %}
+                        <span class="badge badge-success">Active</span>
+                        {% else %}
+                        <span class="badge badge-danger">Disabled</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary"><i class="fa-solid fa-pen"></i> Edit</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

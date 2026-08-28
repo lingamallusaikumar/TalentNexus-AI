@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Candidate Talent Pool | TalentNexus AI{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2><i class="fa-solid fa-users"></i> Candidate Talent Pool</h2>
+            <p class="subtitle">Search, filter, and inspect AI quality-scored candidate profiles</p>
+        </div>
+        <button class="btn btn-primary" onclick="triggerResumeUploadModal()"><i class="fa-solid fa-cloud-arrow-up"></i> Upload New Resume</button>
+    </div>
+
+    <div class="card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Candidate</th>
+                    <th>Headline</th>
+                    <th>Experience</th>
+                    <th>Location</th>
+                    <th>AI Resume Quality</th>
+                    <th>Key Skills</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in candidates %}
+                <tr>
+                    <td>
+                        <a href="/candidates/{{ c.id }}" class="cand-link">
+                            <strong>{{ c.first_name }} {{ c.last_name }}</strong>
+                        </a>
+                        <small class="text-muted d-block">{{ c.email }}</small>
+                    </td>
+                    <td>{{ c.headline or 'Candidate' }}</td>
+                    <td>{{ c.years_of_experience }} yrs</td>
+                    <td>{{ c.location or 'Remote' }}</td>
+                    <td>
+                        <div class="score-pill {% if c.resume_quality_score >= 80 %}score-high{% else %}score-med{% endif %}">
+                            {{ c.resume_quality_score }}/100
+                        </div>
+                    </td>
+                    <td>
+                        {% for s in c.skills[:4] %}
+                        <span class="badge badge-secondary">{{ s.skill_name }}</span>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <a href="/candidates/{{ c.id }}" class="btn btn-sm btn-primary">View Dossier</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
