@@ -7,6 +7,7 @@ def app():
     app = create_app('test')
     
     with app.app_context():
+        import app.common.all_models  # Ensure models are registered
         db.create_all()
         yield app
         db.session.remove()
