@@ -20,9 +20,11 @@ def create_app(config_name=None):
     # Register blueprints
     from app.api import api_bp
     from app.auth.routes import auth_bp
+    from app.resumes.routes import resumes_bp
     
     app.register_blueprint(api_bp, url_prefix='/api/v1')
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
+    app.register_blueprint(resumes_bp, url_prefix='/api/v1/resumes')
     
     # Register error handlers and logger
     from app.common.errors import register_error_handlers
