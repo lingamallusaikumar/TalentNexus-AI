@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ job.title }} | TalentNexus AI{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2><i class="fa-solid fa-briefcase"></i> {{ job.title }}</h2>
+            <p class="subtitle">{{ job.department }} &bull; {{ job.location or 'Remote' }}</p>
+        </div>
+        <a href="/jobs" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Back to Jobs</a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Job Details</h3>
+            <span class="badge badge-success">{{ job.status or 'OPEN' }}</span>
+        </div>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <span class="detail-label">Department</span>
+                <span class="detail-value">{{ job.department or 'Engineering' }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Location</span>
+                <span class="detail-value">{{ job.location or 'Remote' }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Posted</span>
+                <span class="detail-value">{{ job.created_at.strftime('%b %d, %Y') if job.created_at else 'N/A' }}</span>
+            </div>
+        </div>
+        <div class="description-block">
+            <h4>Description</h4>
+            <p>{{ job.description or 'No description provided.' }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

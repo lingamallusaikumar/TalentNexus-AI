@@ -19,13 +19,13 @@
                 <h2>TalentNexus <span class="badge-ai">AI</span></h2>
             </div>
             <nav class="nav-menu">
-                <a href="/" class="nav-item active"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
-                <a href="#jobs" class="nav-item"><i class="fa-solid fa-briefcase"></i> Job Requisitions</a>
-                <a href="#candidates" class="nav-item"><i class="fa-solid fa-users"></i> Candidate Pool</a>
-                <a href="#pipeline" class="nav-item"><i class="fa-solid fa-diagram-project"></i> ATS Pipeline</a>
-                <a href="#search" class="nav-item"><i class="fa-solid fa-magnifying-glass"></i> Semantic Search</a>
-                <a href="#analytics" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Analytics</a>
-                <a href="#workflows" class="nav-item"><i class="fa-solid fa-bolt"></i> Workflows</a>
+                <a href="/" class="nav-item {% if request.path == '/' %}active{% endif %}"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                <a href="/jobs" class="nav-item {% if '/jobs' in request.path %}active{% endif %}"><i class="fa-solid fa-briefcase"></i> Job Requisitions</a>
+                <a href="/candidates" class="nav-item {% if '/candidates' in request.path %}active{% endif %}"><i class="fa-solid fa-users"></i> Candidate Pool</a>
+                <a href="/ats/kanban" class="nav-item {% if '/ats' in request.path %}active{% endif %}"><i class="fa-solid fa-diagram-project"></i> ATS Pipeline</a>
+                <a href="/assessments" class="nav-item {% if '/assessments' in request.path %}active{% endif %}"><i class="fa-solid fa-clipboard-check"></i> Assessments</a>
+                <a href="/admin/users" class="nav-item {% if '/admin' in request.path %}active{% endif %}"><i class="fa-solid fa-shield-halved"></i> Admin Panel</a>
+                <a href="/login" class="nav-item {% if '/login' in request.path %}active{% endif %}"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
             </nav>
             <div class="sidebar-footer">
                 <div class="user-profile-widget">

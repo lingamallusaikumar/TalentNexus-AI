@@ -1,7 +1,7 @@
 from flask_socketio import SocketIO
 
-# We configure message queue using Redis for Celery worker compatibility
-socketio = SocketIO(cors_allowed_origins="*", message_queue='redis://localhost:6379/0')
+# SocketIO instance - message_queue is configured in create_app based on environment
+socketio = SocketIO(cors_allowed_origins="*")
 
 def emit_ranking_update(job_id: int):
     """

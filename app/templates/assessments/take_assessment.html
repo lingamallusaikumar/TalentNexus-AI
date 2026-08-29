@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ assessment.title }} | TalentNexus AI{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h2><i class="fa-solid fa-clipboard-check"></i> {{ assessment.title }}</h2>
+        <a href="/assessments" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Back</a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Assessment Questions</h3>
+            <span class="badge badge-info">{{ assessment.duration_minutes or 60 }} minutes</span>
+        </div>
+        <div class="assessment-body">
+            <p class="text-muted">Assessment content will load here. Questions are pulled from the enterprise question bank.</p>
+            <div class="form-actions">
+                <button class="btn btn-primary"><i class="fa-solid fa-play"></i> Start Assessment</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

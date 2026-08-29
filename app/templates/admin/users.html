@@ -3,6 +3,170 @@
 {% block title %}User Management | TalentNexus AI{% endblock %}
 
 {% block content %}
+<style>
+    /* Org Stats */
+    .org-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 24px;
+    }
+    .org-stat {
+        background: #1e293b;
+        border: 1px solid #2d3a4e;
+        border-radius: 12px;
+        padding: 18px 20px;
+        display: flex; align-items: center; gap: 14px;
+    }
+    .org-stat-icon {
+        width: 42px; height: 42px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 17px; flex-shrink: 0;
+    }
+    .org-stat-val { font-size: 24px; font-weight: 800; color: #f1f5f9; }
+    .org-stat-lbl { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px; }
+
+    /* Search & Role Filter */
+    .user-toolbar {
+        display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
+    }
+    .search-box { flex: 1; min-width: 260px; position: relative; }
+    .search-box i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #475569; font-size: 14px; }
+    .search-box input {
+        width: 100%; padding: 11px 16px 11px 40px;
+        background: #1e293b; border: 1px solid #2d3a4e;
+        border-radius: 10px; color: #e2e8f0;
+        font-size: 13px; font-family: inherit; outline: none;
+        transition: border-color 0.2s;
+    }
+    .search-box input:focus { border-color: rgba(99,102,241,0.5); }
+    .search-box input::placeholder { color: #475569; }
+
+    .role-filter {
+        padding: 10px 14px;
+        border-radius: 10px; border: 1px solid #2d3a4e;
+        background: #1e293b; color: #94a3b8;
+        font-size: 13px; font-family: inherit;
+        outline: none; cursor: pointer;
+    }
+
+    /* Users Table Card */
+    .users-table-card {
+        background: #1e293b;
+        border: 1px solid #2d3a4e;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    .users-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .users-table thead {
+        background: rgba(0,0,0,0.2);
+    }
+    .users-table th {
+        padding: 14px 20px;
+        text-align: left;
+        font-size: 11px;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+    }
+    .users-table tbody tr {
+        border-top: 1px solid rgba(255,255,255,0.04);
+        transition: background 0.15s;
+    }
+    .users-table tbody tr:hover {
+        background: rgba(99,102,241,0.04);
+    }
+    .users-table td {
+        padding: 16px 20px;
+        font-size: 13px;
+        color: #cbd5e1;
+        vertical-align: middle;
+    }
+
+    /* User Cell */
+    .user-cell { display: flex; align-items: center; gap: 12px; }
+    .user-avatar {
+        width: 38px; height: 38px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 13px; font-weight: 700; color: white;
+        flex-shrink: 0;
+    }
+    .user-name { font-weight: 600; color: #f1f5f9; font-size: 14px; }
+    .user-email { font-size: 12px; color: #64748b; margin-top: 2px; }
+
+    /* Role Badge */
+    .role-badge {
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+    .role-superadmin { background: rgba(239,68,68,0.12); color: #f87171; }
+    .role-admin { background: rgba(99,102,241,0.12); color: #818cf8; }
+    .role-recruiter { background: rgba(16,185,129,0.12); color: #34d399; }
+    .role-hiring-mgr { background: rgba(245,158,11,0.12); color: #fbbf24; }
+    .role-viewer { background: rgba(148,163,184,0.12); color: #94a3b8; }
+
+    /* 2FA Status */
+    .tfa-on { color: #34d399; display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; }
+    .tfa-off { color: #475569; display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; }
+
+    /* Account Status */
+    .acct-active { background: rgba(16,185,129,0.1); color: #34d399; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .acct-inactive { background: rgba(239,68,68,0.1); color: #f87171; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .acct-pending { background: rgba(245,158,11,0.1); color: #fbbf24; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+
+    /* Last Active */
+    .last-active { font-size: 12px; color: #64748b; }
+
+    /* Actions */
+    .action-btns { display: flex; gap: 6px; }
+    .btn-action {
+        padding: 6px 12px;
+        border-radius: 7px;
+        border: 1px solid #2d3a4e;
+        background: rgba(255,255,255,0.03);
+        color: #94a3b8;
+        font-size: 11px; font-weight: 600;
+        font-family: inherit; cursor: pointer;
+        display: flex; align-items: center; gap: 5px;
+        transition: all 0.2s;
+    }
+    .btn-action:hover { background: rgba(255,255,255,0.07); color: #e2e8f0; border-color: #475569; }
+    .btn-action.danger:hover { background: rgba(239,68,68,0.1); color: #f87171; border-color: rgba(239,68,68,0.3); }
+
+    /* Pagination */
+    .table-footer {
+        padding: 16px 20px;
+        border-top: 1px solid rgba(255,255,255,0.04);
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .table-count { font-size: 12px; color: #64748b; }
+    .pagination { display: flex; gap: 4px; }
+    .page-btn {
+        width: 32px; height: 32px;
+        border-radius: 7px; border: 1px solid #2d3a4e;
+        background: none; color: #64748b;
+        font-size: 12px; font-family: inherit; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: all 0.2s;
+    }
+    .page-btn:hover { background: rgba(99,102,241,0.1); color: #818cf8; border-color: rgba(99,102,241,0.3); }
+    .page-btn.active { background: rgba(99,102,241,0.12); color: #818cf8; border-color: rgba(99,102,241,0.4); }
+
+    @media (max-width: 900px) {
+        .org-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+</style>
+
 <div class="page-container">
     <div class="page-header">
         <div>
@@ -12,45 +176,216 @@
         <button class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> Invite User</button>
     </div>
 
-    <div class="card">
-        <table class="data-table">
+    <!-- Org Stats -->
+    <div class="org-stats">
+        <div class="org-stat">
+            <div class="org-stat-icon" style="background:rgba(99,102,241,0.1);color:#818cf8"><i class="fa-solid fa-users"></i></div>
+            <div><div class="org-stat-val">18</div><div class="org-stat-lbl">Total Users</div></div>
+        </div>
+        <div class="org-stat">
+            <div class="org-stat-icon" style="background:rgba(16,185,129,0.1);color:#34d399"><i class="fa-solid fa-circle-check"></i></div>
+            <div><div class="org-stat-val">14</div><div class="org-stat-lbl">Active</div></div>
+        </div>
+        <div class="org-stat">
+            <div class="org-stat-icon" style="background:rgba(6,182,212,0.1);color:#22d3ee"><i class="fa-solid fa-shield-check"></i></div>
+            <div><div class="org-stat-val">11</div><div class="org-stat-lbl">2FA Enabled</div></div>
+        </div>
+        <div class="org-stat">
+            <div class="org-stat-icon" style="background:rgba(245,158,11,0.1);color:#fbbf24"><i class="fa-solid fa-envelope"></i></div>
+            <div><div class="org-stat-val">4</div><div class="org-stat-lbl">Pending Invite</div></div>
+        </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="user-toolbar">
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search users by name, email or role...">
+        </div>
+        <select class="role-filter">
+            <option>All Roles</option>
+            <option>Super Admin</option>
+            <option>Admin</option>
+            <option>Recruiter</option>
+            <option>Hiring Manager</option>
+            <option>Viewer</option>
+        </select>
+    </div>
+
+    <!-- Users Table -->
+    <div class="users-table-card">
+        <table class="users-table">
             <thead>
                 <tr>
                     <th>User</th>
-                    <th>Email</th>
                     <th>Role</th>
-                    <th>2FA Status</th>
-                    <th>Account Status</th>
+                    <th>2FA</th>
+                    <th>Status</th>
+                    <th>Last Active</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
+                {% if not users %}
+                <!-- Demo Users -->
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar" style="background:linear-gradient(135deg,#ef4444,#f87171)">JA</div>
+                            <div><div class="user-name">James Anderson</div><div class="user-email">j.anderson@company.com</div></div>
+                        </div>
+                    </td>
+                    <td><span class="role-badge role-superadmin">Super Admin</span></td>
+                    <td><span class="tfa-on"><i class="fa-solid fa-shield-check"></i> Enabled</span></td>
+                    <td><span class="acct-active">Active</span></td>
+                    <td><span class="last-active">Just now</span></td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-action"><i class="fa-solid fa-pen"></i> Edit</button>
+                            <button class="btn-action"><i class="fa-solid fa-key"></i> Reset</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar" style="background:linear-gradient(135deg,#6366f1,#818cf8)">PM</div>
+                            <div><div class="user-name">Patricia Moore</div><div class="user-email">p.moore@company.com</div></div>
+                        </div>
+                    </td>
+                    <td><span class="role-badge role-admin">Admin</span></td>
+                    <td><span class="tfa-on"><i class="fa-solid fa-shield-check"></i> Enabled</span></td>
+                    <td><span class="acct-active">Active</span></td>
+                    <td><span class="last-active">2 hrs ago</span></td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-action"><i class="fa-solid fa-pen"></i> Edit</button>
+                            <button class="btn-action danger"><i class="fa-solid fa-ban"></i> Disable</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar" style="background:linear-gradient(135deg,#10b981,#34d399)">KN</div>
+                            <div><div class="user-name">Karen Nguyen</div><div class="user-email">k.nguyen@company.com</div></div>
+                        </div>
+                    </td>
+                    <td><span class="role-badge role-recruiter">Recruiter</span></td>
+                    <td><span class="tfa-on"><i class="fa-solid fa-shield-check"></i> Enabled</span></td>
+                    <td><span class="acct-active">Active</span></td>
+                    <td><span class="last-active">1 day ago</span></td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-action"><i class="fa-solid fa-pen"></i> Edit</button>
+                            <button class="btn-action danger"><i class="fa-solid fa-ban"></i> Disable</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">BW</div>
+                            <div><div class="user-name">Brian Walker</div><div class="user-email">b.walker@company.com</div></div>
+                        </div>
+                    </td>
+                    <td><span class="role-badge role-hiring-mgr">Hiring Mgr</span></td>
+                    <td><span class="tfa-off"><i class="fa-solid fa-shield"></i> Disabled</span></td>
+                    <td><span class="acct-active">Active</span></td>
+                    <td><span class="last-active">3 days ago</span></td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-action"><i class="fa-solid fa-pen"></i> Edit</button>
+                            <button class="btn-action"><i class="fa-solid fa-shield"></i> Enable 2FA</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar" style="background:linear-gradient(135deg,#06b6d4,#22d3ee)">LH</div>
+                            <div><div class="user-name">Laura Harris</div><div class="user-email">l.harris@company.com</div></div>
+                        </div>
+                    </td>
+                    <td><span class="role-badge role-recruiter">Recruiter</span></td>
+                    <td><span class="tfa-off"><i class="fa-solid fa-shield"></i> Disabled</span></td>
+                    <td><span class="acct-pending">Pending Invite</span></td>
+                    <td><span class="last-active">Never</span></td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-action"><i class="fa-solid fa-paper-plane"></i> Resend</button>
+                            <button class="btn-action danger"><i class="fa-solid fa-trash"></i> Revoke</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar" style="background:linear-gradient(135deg,#94a3b8,#cbd5e1)">MT</div>
+                            <div><div class="user-name">Mark Taylor</div><div class="user-email">m.taylor@company.com</div></div>
+                        </div>
+                    </td>
+                    <td><span class="role-badge role-viewer">Viewer</span></td>
+                    <td><span class="tfa-off"><i class="fa-solid fa-shield"></i> Disabled</span></td>
+                    <td><span class="acct-inactive">Disabled</span></td>
+                    <td><span class="last-active">2 weeks ago</span></td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-action"><i class="fa-solid fa-pen"></i> Edit</button>
+                            <button class="btn-action"><i class="fa-solid fa-rotate-right"></i> Enable</button>
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+
                 {% for u in users %}
                 <tr>
-                    <td><strong>{{ u.full_name }}</strong></td>
-                    <td>{{ u.email }}</td>
-                    <td><span class="badge badge-primary">{{ u.role.name if u.role else 'Candidate' }}</span></td>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar" style="background:linear-gradient(135deg,#6366f1,#818cf8)">
+                                {{ u.full_name[0] if u.full_name else '?' }}
+                            </div>
+                            <div>
+                                <div class="user-name">{{ u.full_name }}</div>
+                                <div class="user-email">{{ u.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="role-badge role-recruiter">{{ u.role.name if u.role else 'Viewer' }}</span></td>
                     <td>
                         {% if u.two_factor_enabled %}
-                        <span class="text-success"><i class="fa-solid fa-shield-check"></i> Enabled</span>
+                        <span class="tfa-on"><i class="fa-solid fa-shield-check"></i> On</span>
                         {% else %}
-                        <span class="text-muted"><i class="fa-solid fa-shield"></i> Disabled</span>
+                        <span class="tfa-off"><i class="fa-solid fa-shield"></i> Off</span>
                         {% endif %}
                     </td>
                     <td>
                         {% if u.is_active %}
-                        <span class="badge badge-success">Active</span>
+                        <span class="acct-active">Active</span>
                         {% else %}
-                        <span class="badge badge-danger">Disabled</span>
+                        <span class="acct-inactive">Disabled</span>
                         {% endif %}
                     </td>
+                    <td><span class="last-active">—</span></td>
                     <td>
-                        <button class="btn btn-sm btn-secondary"><i class="fa-solid fa-pen"></i> Edit</button>
+                        <div class="action-btns">
+                            <button class="btn-action"><i class="fa-solid fa-pen"></i> Edit</button>
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+        <div class="table-footer">
+            <span class="table-count">Showing 6 of 18 users</span>
+            <div class="pagination">
+                <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

@@ -3,7 +3,227 @@
 {% block title %}Job Requisitions | TalentNexus AI{% endblock %}
 
 {% block content %}
-<div class="page-container">
+<style>
+    .jobs-page .page-header { margin-bottom: 24px; }
+
+    /* Filter Bar */
+    .filter-bar {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    .filter-pill {
+        padding: 8px 16px;
+        border-radius: 10px;
+        border: 1px solid #2d3a4e;
+        background: #1e293b;
+        color: #94a3b8;
+        font-size: 13px;
+        font-weight: 500;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .filter-pill:hover { border-color: rgba(99,102,241,0.4); color: #e2e8f0; }
+    .filter-pill.active {
+        background: rgba(99,102,241,0.12);
+        border-color: rgba(99,102,241,0.4);
+        color: #818cf8;
+    }
+    .filter-pill .count {
+        background: rgba(255,255,255,0.08);
+        padding: 1px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    /* Job Cards Grid */
+    .jobs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 16px;
+    }
+    .job-card {
+        background: #1e293b;
+        border: 1px solid #2d3a4e;
+        border-radius: 16px;
+        padding: 24px;
+        transition: all 0.25s;
+        position: relative;
+        overflow: hidden;
+    }
+    .job-card:hover {
+        border-color: rgba(99,102,241,0.35);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+    }
+    .job-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+    }
+    .job-card.dept-engineering::before { background: linear-gradient(90deg, #3b82f6, #6366f1); }
+    .job-card.dept-data::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+    .job-card.dept-devops::before { background: linear-gradient(90deg, #10b981, #34d399); }
+    .job-card.dept-product::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .job-card.dept-design::before { background: linear-gradient(90deg, #ec4899, #f472b6); }
+
+    .job-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 14px;
+    }
+    .job-card-header h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #f1f5f9;
+        line-height: 1.3;
+        flex: 1;
+        margin-right: 12px;
+    }
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+    }
+    .status-open { background: rgba(16,185,129,0.12); color: #34d399; }
+    .status-paused { background: rgba(245,158,11,0.12); color: #fbbf24; }
+    .status-closed { background: rgba(239,68,68,0.12); color: #f87171; }
+    .status-draft { background: rgba(148,163,184,0.12); color: #94a3b8; }
+
+    .job-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-bottom: 16px;
+    }
+    .job-meta span {
+        font-size: 12px;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .job-meta span i { font-size: 12px; color: #475569; }
+
+    /* Skill Tags */
+    .job-skills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 16px;
+    }
+    .job-skill-tag {
+        font-size: 11px;
+        padding: 3px 10px;
+        border-radius: 6px;
+        background: rgba(99,102,241,0.08);
+        color: #a5b4fc;
+        border: 1px solid rgba(99,102,241,0.12);
+    }
+
+    /* Score Row */
+    .score-row {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    .score-item {
+        flex: 1;
+        background: rgba(0,0,0,0.15);
+        border-radius: 10px;
+        padding: 10px 14px;
+        text-align: center;
+    }
+    .score-item .score-label {
+        font-size: 10px;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+        margin-bottom: 4px;
+    }
+    .score-item .score-value {
+        font-size: 18px;
+        font-weight: 800;
+    }
+    .score-item .score-value.good { color: #34d399; }
+    .score-item .score-value.medium { color: #fbbf24; }
+
+    /* Applicant Bar */
+    .applicant-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 14px;
+        border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .applicant-avatars {
+        display: flex;
+        margin-right: 10px;
+    }
+    .applicant-avatars .mini-avatar {
+        width: 28px; height: 28px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: white;
+        margin-left: -6px;
+        border: 2px solid #1e293b;
+    }
+    .applicant-avatars .mini-avatar:first-child { margin-left: 0; }
+    .applicant-count {
+        font-size: 12px;
+        color: #94a3b8;
+    }
+    .applicant-count strong { color: #e2e8f0; }
+
+    .btn-view {
+        padding: 8px 16px;
+        border-radius: 8px;
+        background: rgba(99,102,241,0.1);
+        border: 1px solid rgba(99,102,241,0.25);
+        color: #818cf8;
+        font-size: 12px;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .btn-view:hover {
+        background: rgba(99,102,241,0.18);
+        color: #a5b4fc;
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #64748b;
+    }
+    .empty-state i { font-size: 48px; margin-bottom: 16px; color: #475569; }
+    .empty-state h3 { color: #94a3b8; margin-bottom: 8px; }
+</style>
+
+<div class="jobs-page">
     <div class="page-header">
         <div>
             <h2><i class="fa-solid fa-briefcase"></i> Job Requisitions</h2>
@@ -12,35 +232,303 @@
         <a href="/jobs/new" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Create Requisition</a>
     </div>
 
-    <div class="card">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Job Title</th>
-                    <th>Location</th>
-                    <th>Type</th>
-                    <th>Status</th>
-                    <th>Quality Score</th>
-                    <th>Inclusive Score</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for j in jobs %}
-                <tr>
-                    <td><strong>{{ j.title }}</strong></td>
-                    <td>{{ j.location or 'Remote' }}</td>
-                    <td><span class="badge badge-secondary">{{ j.employment_type }}</span></td>
-                    <td><span class="badge badge-success">{{ j.status }}</span></td>
-                    <td><div class="score-pill score-high">{{ j.description_quality_score }}/100</div></td>
-                    <td><div class="score-pill score-high">{{ j.inclusive_language_score }}/100</div></td>
-                    <td>
-                        <a href="/jobs/{{ j.id }}" class="btn btn-sm btn-primary">Rankings</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <button class="filter-pill active"><i class="fa-solid fa-layer-group"></i> All <span class="count">12</span></button>
+        <button class="filter-pill"><i class="fa-solid fa-circle-check"></i> Open <span class="count">8</span></button>
+        <button class="filter-pill"><i class="fa-solid fa-pause-circle"></i> Paused <span class="count">2</span></button>
+        <button class="filter-pill"><i class="fa-solid fa-file-pen"></i> Draft <span class="count">2</span></button>
+    </div>
+
+    <!-- Job Cards Grid -->
+    <div class="jobs-grid">
+        <!-- Demo cards when DB is empty -->
+        {% if not jobs %}
+        <div class="job-card dept-engineering">
+            <div class="job-card-header">
+                <h3>Senior Python Architect</h3>
+                <span class="status-badge status-open">Open</span>
+            </div>
+            <div class="job-meta">
+                <span><i class="fa-solid fa-building"></i> Engineering</span>
+                <span><i class="fa-solid fa-location-dot"></i> Remote</span>
+                <span><i class="fa-solid fa-dollar-sign"></i> 150K – 200K</span>
+                <span><i class="fa-solid fa-clock"></i> Full-time</span>
+            </div>
+            <div class="job-skills">
+                <span class="job-skill-tag">Python</span>
+                <span class="job-skill-tag">Flask</span>
+                <span class="job-skill-tag">PostgreSQL</span>
+                <span class="job-skill-tag">Docker</span>
+                <span class="job-skill-tag">Celery</span>
+            </div>
+            <div class="score-row">
+                <div class="score-item">
+                    <span class="score-label">JD Quality</span>
+                    <span class="score-value good">92</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Inclusive Score</span>
+                    <span class="score-value good">88</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Applicants</span>
+                    <span class="score-value good">47</span>
+                </div>
+            </div>
+            <div class="applicant-bar">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <div class="applicant-avatars">
+                        <div class="mini-avatar" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">AR</div>
+                        <div class="mini-avatar" style="background:linear-gradient(135deg,#10b981,#34d399)">SC</div>
+                        <div class="mini-avatar" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">DK</div>
+                        <div class="mini-avatar" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">+44</div>
+                    </div>
+                    <span class="applicant-count"><strong>47</strong> applicants</span>
+                </div>
+                <a href="#" class="btn-view"><i class="fa-solid fa-ranking-star"></i> Rankings</a>
+            </div>
+        </div>
+
+        <div class="job-card dept-data">
+            <div class="job-card-header">
+                <h3>Lead ML Engineer</h3>
+                <span class="status-badge status-open">Open</span>
+            </div>
+            <div class="job-meta">
+                <span><i class="fa-solid fa-building"></i> Data Science</span>
+                <span><i class="fa-solid fa-location-dot"></i> San Francisco, CA</span>
+                <span><i class="fa-solid fa-dollar-sign"></i> 180K – 240K</span>
+                <span><i class="fa-solid fa-clock"></i> Full-time</span>
+            </div>
+            <div class="job-skills">
+                <span class="job-skill-tag">PyTorch</span>
+                <span class="job-skill-tag">TensorFlow</span>
+                <span class="job-skill-tag">MLflow</span>
+                <span class="job-skill-tag">LLMs</span>
+            </div>
+            <div class="score-row">
+                <div class="score-item">
+                    <span class="score-label">JD Quality</span>
+                    <span class="score-value good">95</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Inclusive Score</span>
+                    <span class="score-value good">91</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Applicants</span>
+                    <span class="score-value medium">23</span>
+                </div>
+            </div>
+            <div class="applicant-bar">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <div class="applicant-avatars">
+                        <div class="mini-avatar" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">MR</div>
+                        <div class="mini-avatar" style="background:linear-gradient(135deg,#06b6d4,#22d3ee)">JW</div>
+                        <div class="mini-avatar" style="background:linear-gradient(135deg,#ec4899,#f472b6)">+21</div>
+                    </div>
+                    <span class="applicant-count"><strong>23</strong> applicants</span>
+                </div>
+                <a href="#" class="btn-view"><i class="fa-solid fa-ranking-star"></i> Rankings</a>
+            </div>
+        </div>
+
+        <div class="job-card dept-devops">
+            <div class="job-card-header">
+                <h3>DevOps & SRE Lead</h3>
+                <span class="status-badge status-open">Open</span>
+            </div>
+            <div class="job-meta">
+                <span><i class="fa-solid fa-building"></i> DevOps</span>
+                <span><i class="fa-solid fa-location-dot"></i> Remote (US)</span>
+                <span><i class="fa-solid fa-dollar-sign"></i> 140K – 185K</span>
+                <span><i class="fa-solid fa-clock"></i> Full-time</span>
+            </div>
+            <div class="job-skills">
+                <span class="job-skill-tag">Kubernetes</span>
+                <span class="job-skill-tag">Terraform</span>
+                <span class="job-skill-tag">AWS</span>
+                <span class="job-skill-tag">CI/CD</span>
+            </div>
+            <div class="score-row">
+                <div class="score-item">
+                    <span class="score-label">JD Quality</span>
+                    <span class="score-value good">87</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Inclusive Score</span>
+                    <span class="score-value good">84</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Applicants</span>
+                    <span class="score-value medium">18</span>
+                </div>
+            </div>
+            <div class="applicant-bar">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <div class="applicant-avatars">
+                        <div class="mini-avatar" style="background:linear-gradient(135deg,#10b981,#34d399)">DV</div>
+                        <div class="mini-avatar" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">RP</div>
+                        <div class="mini-avatar" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">+16</div>
+                    </div>
+                    <span class="applicant-count"><strong>18</strong> applicants</span>
+                </div>
+                <a href="#" class="btn-view"><i class="fa-solid fa-ranking-star"></i> Rankings</a>
+            </div>
+        </div>
+
+        <div class="job-card dept-engineering">
+            <div class="job-card-header">
+                <h3>Full Stack Engineer (React + Python)</h3>
+                <span class="status-badge status-paused">Paused</span>
+            </div>
+            <div class="job-meta">
+                <span><i class="fa-solid fa-building"></i> Engineering</span>
+                <span><i class="fa-solid fa-location-dot"></i> New York, NY</span>
+                <span><i class="fa-solid fa-dollar-sign"></i> 120K – 160K</span>
+                <span><i class="fa-solid fa-clock"></i> Full-time</span>
+            </div>
+            <div class="job-skills">
+                <span class="job-skill-tag">React</span>
+                <span class="job-skill-tag">Python</span>
+                <span class="job-skill-tag">GraphQL</span>
+                <span class="job-skill-tag">Node.js</span>
+            </div>
+            <div class="score-row">
+                <div class="score-item">
+                    <span class="score-label">JD Quality</span>
+                    <span class="score-value medium">76</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Inclusive Score</span>
+                    <span class="score-value medium">72</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Applicants</span>
+                    <span class="score-value medium">31</span>
+                </div>
+            </div>
+            <div class="applicant-bar">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <div class="applicant-avatars">
+                        <div class="mini-avatar" style="background:linear-gradient(135deg,#ec4899,#f472b6)">EW</div>
+                        <div class="mini-avatar" style="background:linear-gradient(135deg,#06b6d4,#22d3ee)">+30</div>
+                    </div>
+                    <span class="applicant-count"><strong>31</strong> applicants</span>
+                </div>
+                <a href="#" class="btn-view"><i class="fa-solid fa-ranking-star"></i> Rankings</a>
+            </div>
+        </div>
+
+        <div class="job-card dept-product">
+            <div class="job-card-header">
+                <h3>Technical Product Manager</h3>
+                <span class="status-badge status-open">Open</span>
+            </div>
+            <div class="job-meta">
+                <span><i class="fa-solid fa-building"></i> Product</span>
+                <span><i class="fa-solid fa-location-dot"></i> Austin, TX</span>
+                <span><i class="fa-solid fa-dollar-sign"></i> 130K – 170K</span>
+                <span><i class="fa-solid fa-clock"></i> Full-time</span>
+            </div>
+            <div class="job-skills">
+                <span class="job-skill-tag">Agile</span>
+                <span class="job-skill-tag">SQL</span>
+                <span class="job-skill-tag">Jira</span>
+                <span class="job-skill-tag">API Design</span>
+            </div>
+            <div class="score-row">
+                <div class="score-item">
+                    <span class="score-label">JD Quality</span>
+                    <span class="score-value good">89</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Inclusive Score</span>
+                    <span class="score-value good">93</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Applicants</span>
+                    <span class="score-value medium">14</span>
+                </div>
+            </div>
+            <div class="applicant-bar">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <div class="applicant-avatars">
+                        <div class="mini-avatar" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">KN</div>
+                        <div class="mini-avatar" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">+13</div>
+                    </div>
+                    <span class="applicant-count"><strong>14</strong> applicants</span>
+                </div>
+                <a href="#" class="btn-view"><i class="fa-solid fa-ranking-star"></i> Rankings</a>
+            </div>
+        </div>
+
+        <div class="job-card dept-design">
+            <div class="job-card-header">
+                <h3>Senior UX Designer</h3>
+                <span class="status-badge status-draft">Draft</span>
+            </div>
+            <div class="job-meta">
+                <span><i class="fa-solid fa-building"></i> Design</span>
+                <span><i class="fa-solid fa-location-dot"></i> Remote</span>
+                <span><i class="fa-solid fa-dollar-sign"></i> 110K – 145K</span>
+                <span><i class="fa-solid fa-clock"></i> Full-time</span>
+            </div>
+            <div class="job-skills">
+                <span class="job-skill-tag">Figma</span>
+                <span class="job-skill-tag">Design Systems</span>
+                <span class="job-skill-tag">User Research</span>
+            </div>
+            <div class="score-row">
+                <div class="score-item">
+                    <span class="score-label">JD Quality</span>
+                    <span class="score-value medium">--</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Inclusive Score</span>
+                    <span class="score-value medium">--</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Applicants</span>
+                    <span class="score-value medium">0</span>
+                </div>
+            </div>
+            <div class="applicant-bar">
+                <span class="applicant-count" style="color:#475569">Not yet published</span>
+                <a href="#" class="btn-view"><i class="fa-solid fa-pen"></i> Edit Draft</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Real DB jobs -->
+        {% for j in jobs %}
+        <div class="job-card dept-engineering">
+            <div class="job-card-header">
+                <h3>{{ j.title }}</h3>
+                <span class="status-badge status-open">{{ j.status }}</span>
+            </div>
+            <div class="job-meta">
+                <span><i class="fa-solid fa-building"></i> {{ j.department or 'Engineering' }}</span>
+                <span><i class="fa-solid fa-location-dot"></i> {{ j.location or 'Remote' }}</span>
+                <span><i class="fa-solid fa-clock"></i> {{ j.employment_type or 'Full-time' }}</span>
+            </div>
+            <div class="score-row">
+                <div class="score-item">
+                    <span class="score-label">JD Quality</span>
+                    <span class="score-value good">{{ j.description_quality_score or '--' }}</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Inclusive</span>
+                    <span class="score-value good">{{ j.inclusive_language_score or '--' }}</span>
+                </div>
+            </div>
+            <div class="applicant-bar">
+                <span class="applicant-count">Created {{ j.created_at.strftime('%b %d') if j.created_at else 'N/A' }}</span>
+                <a href="/jobs/{{ j.id }}" class="btn-view"><i class="fa-solid fa-ranking-star"></i> View</a>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

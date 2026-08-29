@@ -3,57 +3,422 @@
 {% block title %}Candidate Talent Pool | TalentNexus AI{% endblock %}
 
 {% block content %}
+<style>
+    /* Search & Filter Bar */
+    .search-filter-bar {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    .search-box {
+        flex: 1;
+        min-width: 260px;
+        position: relative;
+    }
+    .search-box i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #475569;
+        font-size: 14px;
+    }
+    .search-box input {
+        width: 100%;
+        padding: 11px 16px 11px 40px;
+        background: #1e293b;
+        border: 1px solid #2d3a4e;
+        border-radius: 10px;
+        color: #e2e8f0;
+        font-size: 13px;
+        font-family: inherit;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    .search-box input:focus { border-color: rgba(99,102,241,0.5); }
+    .search-box input::placeholder { color: #475569; }
+
+    .filter-pill {
+        padding: 9px 16px;
+        border-radius: 10px;
+        border: 1px solid #2d3a4e;
+        background: #1e293b;
+        color: #94a3b8;
+        font-size: 12px;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .filter-pill:hover { border-color: rgba(99,102,241,0.4); color: #e2e8f0; }
+    .filter-pill.active { background: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.4); color: #818cf8; }
+
+    /* Summary Stats Row */
+    .pool-stats {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+    .pool-stat {
+        flex: 1;
+        min-width: 150px;
+        background: #1e293b;
+        border: 1px solid #2d3a4e;
+        border-radius: 12px;
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .pool-stat-icon {
+        width: 40px; height: 40px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 16px; flex-shrink: 0;
+    }
+    .pool-stat-val { font-size: 22px; font-weight: 800; color: #f1f5f9; }
+    .pool-stat-lbl { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* Candidate Cards Grid */
+    .candidates-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 16px;
+    }
+    .cand-card {
+        background: #1e293b;
+        border: 1px solid #2d3a4e;
+        border-radius: 16px;
+        padding: 22px;
+        transition: all 0.25s;
+        position: relative;
+    }
+    .cand-card:hover {
+        border-color: rgba(99,102,241,0.35);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+    }
+
+    /* Card Top: Avatar + Identity + Score */
+    .cand-card-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        margin-bottom: 14px;
+    }
+    .cand-avatar {
+        width: 52px; height: 52px;
+        border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px; font-weight: 800; color: white;
+        flex-shrink: 0;
+    }
+    .cand-info { flex: 1; min-width: 0; }
+    .cand-info h3 { font-size: 15px; font-weight: 700; color: #f1f5f9; }
+    .cand-info .headline { font-size: 12px; color: #64748b; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cand-info .cand-meta { display: flex; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
+    .cand-info .cand-meta span { font-size: 11px; color: #475569; display: flex; align-items: center; gap: 4px; }
+
+    /* AI Score Badge */
+    .ai-score-badge {
+        text-align: center; flex-shrink: 0;
+    }
+    .ai-score-num {
+        font-size: 20px; font-weight: 800;
+        display: block;
+    }
+    .ai-score-lbl { font-size: 9px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; }
+    .score-green { color: #34d399; }
+    .score-amber { color: #fbbf24; }
+
+    /* Skills */
+    .cand-skills {
+        display: flex; flex-wrap: wrap; gap: 6px;
+        margin: 12px 0;
+    }
+    .skill-chip {
+        font-size: 11px;
+        padding: 3px 9px;
+        border-radius: 6px;
+        background: rgba(99,102,241,0.08);
+        color: #a5b4fc;
+        border: 1px solid rgba(99,102,241,0.12);
+    }
+
+    /* Card Footer */
+    .cand-card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        margin-top: 4px;
+    }
+    .pipeline-stage {
+        font-size: 10px; font-weight: 700;
+        padding: 3px 10px; border-radius: 6px;
+        text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .stage-applied { background: rgba(59,130,246,0.12); color: #60a5fa; }
+    .stage-shortlisted { background: rgba(139,92,246,0.12); color: #a78bfa; }
+    .stage-interview { background: rgba(6,182,212,0.12); color: #22d3ee; }
+    .stage-hired { background: rgba(16,185,129,0.12); color: #34d399; }
+
+    .btn-dossier {
+        padding: 7px 14px;
+        border-radius: 8px;
+        background: rgba(99,102,241,0.1);
+        border: 1px solid rgba(99,102,241,0.25);
+        color: #818cf8;
+        font-size: 12px; font-weight: 600;
+        font-family: inherit; cursor: pointer;
+        text-decoration: none;
+        display: flex; align-items: center; gap: 6px;
+        transition: all 0.2s;
+    }
+    .btn-dossier:hover { background: rgba(99,102,241,0.18); }
+</style>
+
 <div class="page-container">
     <div class="page-header">
         <div>
             <h2><i class="fa-solid fa-users"></i> Candidate Talent Pool</h2>
             <p class="subtitle">Search, filter, and inspect AI quality-scored candidate profiles</p>
         </div>
-        <button class="btn btn-primary" onclick="triggerResumeUploadModal()"><i class="fa-solid fa-cloud-arrow-up"></i> Upload New Resume</button>
+        <button class="btn btn-primary" onclick="triggerResumeUploadModal()">
+            <i class="fa-solid fa-cloud-arrow-up"></i> Upload Resume
+        </button>
     </div>
 
-    <div class="card">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Candidate</th>
-                    <th>Headline</th>
-                    <th>Experience</th>
-                    <th>Location</th>
-                    <th>AI Resume Quality</th>
-                    <th>Key Skills</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for c in candidates %}
-                <tr>
-                    <td>
-                        <a href="/candidates/{{ c.id }}" class="cand-link">
-                            <strong>{{ c.first_name }} {{ c.last_name }}</strong>
-                        </a>
-                        <small class="text-muted d-block">{{ c.email }}</small>
-                    </td>
-                    <td>{{ c.headline or 'Candidate' }}</td>
-                    <td>{{ c.years_of_experience }} yrs</td>
-                    <td>{{ c.location or 'Remote' }}</td>
-                    <td>
-                        <div class="score-pill {% if c.resume_quality_score >= 80 %}score-high{% else %}score-med{% endif %}">
-                            {{ c.resume_quality_score }}/100
-                        </div>
-                    </td>
-                    <td>
-                        {% for s in c.skills[:4] %}
-                        <span class="badge badge-secondary">{{ s.skill_name }}</span>
-                        {% endfor %}
-                    </td>
-                    <td>
-                        <a href="/candidates/{{ c.id }}" class="btn btn-sm btn-primary">View Dossier</a>
-                    </td>
-                </tr>
+    <!-- Pool Stats -->
+    <div class="pool-stats">
+        <div class="pool-stat">
+            <div class="pool-stat-icon" style="background:rgba(99,102,241,0.1);color:#818cf8"><i class="fa-solid fa-users"></i></div>
+            <div><div class="pool-stat-val">1,428</div><div class="pool-stat-lbl">Total Candidates</div></div>
+        </div>
+        <div class="pool-stat">
+            <div class="pool-stat-icon" style="background:rgba(16,185,129,0.1);color:#34d399"><i class="fa-solid fa-star"></i></div>
+            <div><div class="pool-stat-val">342</div><div class="pool-stat-lbl">Shortlisted</div></div>
+        </div>
+        <div class="pool-stat">
+            <div class="pool-stat-icon" style="background:rgba(6,182,212,0.1);color:#22d3ee"><i class="fa-solid fa-calendar-check"></i></div>
+            <div><div class="pool-stat-val">89</div><div class="pool-stat-lbl">In Interview</div></div>
+        </div>
+        <div class="pool-stat">
+            <div class="pool-stat-icon" style="background:rgba(245,158,11,0.1);color:#fbbf24"><i class="fa-solid fa-robot"></i></div>
+            <div><div class="pool-stat-val">78.4%</div><div class="pool-stat-lbl">Avg AI Match</div></div>
+        </div>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="search-filter-bar">
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search by name, skill, role, location...">
+        </div>
+        <button class="filter-pill active"><i class="fa-solid fa-layer-group"></i> All</button>
+        <button class="filter-pill"><i class="fa-solid fa-star"></i> Shortlisted</button>
+        <button class="filter-pill"><i class="fa-solid fa-calendar-check"></i> Interview</button>
+        <button class="filter-pill"><i class="fa-solid fa-sliders"></i> Filter</button>
+    </div>
+
+    <!-- Candidates Grid -->
+    <div class="candidates-grid">
+        {% if not candidates %}
+
+        <!-- Demo Cards -->
+        <div class="cand-card">
+            <div class="cand-card-top">
+                <div class="cand-avatar" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">AR</div>
+                <div class="cand-info">
+                    <h3>Alex Rivera</h3>
+                    <p class="headline">Senior ML Engineer &bull; San Francisco, CA</p>
+                    <div class="cand-meta">
+                        <span><i class="fa-solid fa-briefcase"></i> 6 yrs exp</span>
+                        <span><i class="fa-solid fa-graduation-cap"></i> MIT, CS</span>
+                    </div>
+                </div>
+                <div class="ai-score-badge">
+                    <span class="ai-score-num score-green">94</span>
+                    <span class="ai-score-lbl">AI Score</span>
+                </div>
+            </div>
+            <div class="cand-skills">
+                <span class="skill-chip">PyTorch</span><span class="skill-chip">Python</span>
+                <span class="skill-chip">MLflow</span><span class="skill-chip">LLMs</span><span class="skill-chip">FastAPI</span>
+            </div>
+            <div class="cand-card-footer">
+                <span class="pipeline-stage stage-shortlisted"><i class="fa-solid fa-star"></i> Shortlisted</span>
+                <a href="#" class="btn-dossier"><i class="fa-solid fa-id-card"></i> Dossier</a>
+            </div>
+        </div>
+
+        <div class="cand-card">
+            <div class="cand-card-top">
+                <div class="cand-avatar" style="background:linear-gradient(135deg,#06b6d4,#22d3ee)">SC</div>
+                <div class="cand-info">
+                    <h3>Sarah Chen</h3>
+                    <p class="headline">Full Stack Developer &bull; Austin, TX</p>
+                    <div class="cand-meta">
+                        <span><i class="fa-solid fa-briefcase"></i> 4 yrs exp</span>
+                        <span><i class="fa-solid fa-graduation-cap"></i> UT Austin</span>
+                    </div>
+                </div>
+                <div class="ai-score-badge">
+                    <span class="ai-score-num score-green">88</span>
+                    <span class="ai-score-lbl">AI Score</span>
+                </div>
+            </div>
+            <div class="cand-skills">
+                <span class="skill-chip">React</span><span class="skill-chip">Django</span>
+                <span class="skill-chip">PostgreSQL</span><span class="skill-chip">Docker</span>
+            </div>
+            <div class="cand-card-footer">
+                <span class="pipeline-stage stage-interview"><i class="fa-solid fa-calendar-check"></i> Interview</span>
+                <a href="#" class="btn-dossier"><i class="fa-solid fa-id-card"></i> Dossier</a>
+            </div>
+        </div>
+
+        <div class="cand-card">
+            <div class="cand-card-top">
+                <div class="cand-avatar" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">MC</div>
+                <div class="cand-info">
+                    <h3>Michael Chang</h3>
+                    <p class="headline">Senior Backend Engineer &bull; Remote</p>
+                    <div class="cand-meta">
+                        <span><i class="fa-solid fa-briefcase"></i> 5 yrs exp</span>
+                        <span><i class="fa-solid fa-graduation-cap"></i> Stanford</span>
+                    </div>
+                </div>
+                <div class="ai-score-badge">
+                    <span class="ai-score-num score-green">91</span>
+                    <span class="ai-score-lbl">AI Score</span>
+                </div>
+            </div>
+            <div class="cand-skills">
+                <span class="skill-chip">Python</span><span class="skill-chip">Golang</span>
+                <span class="skill-chip">Kubernetes</span><span class="skill-chip">gRPC</span>
+            </div>
+            <div class="cand-card-footer">
+                <span class="pipeline-stage stage-applied"><i class="fa-solid fa-file-lines"></i> Applied</span>
+                <a href="#" class="btn-dossier"><i class="fa-solid fa-id-card"></i> Dossier</a>
+            </div>
+        </div>
+
+        <div class="cand-card">
+            <div class="cand-card-top">
+                <div class="cand-avatar" style="background:linear-gradient(135deg,#10b981,#34d399)">DV</div>
+                <div class="cand-info">
+                    <h3>David Vance</h3>
+                    <p class="headline">DevOps Lead &bull; New York, NY</p>
+                    <div class="cand-meta">
+                        <span><i class="fa-solid fa-briefcase"></i> 8 yrs exp</span>
+                        <span><i class="fa-solid fa-graduation-cap"></i> CMU</span>
+                    </div>
+                </div>
+                <div class="ai-score-badge">
+                    <span class="ai-score-num score-green">96</span>
+                    <span class="ai-score-lbl">AI Score</span>
+                </div>
+            </div>
+            <div class="cand-skills">
+                <span class="skill-chip">AWS</span><span class="skill-chip">Terraform</span>
+                <span class="skill-chip">Kubernetes</span><span class="skill-chip">CI/CD</span>
+            </div>
+            <div class="cand-card-footer">
+                <span class="pipeline-stage stage-hired"><i class="fa-solid fa-handshake"></i> Hired</span>
+                <a href="#" class="btn-dossier"><i class="fa-solid fa-id-card"></i> Dossier</a>
+            </div>
+        </div>
+
+        <div class="cand-card">
+            <div class="cand-card-top">
+                <div class="cand-avatar" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">EW</div>
+                <div class="cand-info">
+                    <h3>Emily Watson</h3>
+                    <p class="headline">Frontend Engineer &bull; Seattle, WA</p>
+                    <div class="cand-meta">
+                        <span><i class="fa-solid fa-briefcase"></i> 2 yrs exp</span>
+                        <span><i class="fa-solid fa-graduation-cap"></i> UW</span>
+                    </div>
+                </div>
+                <div class="ai-score-badge">
+                    <span class="ai-score-num score-amber">74</span>
+                    <span class="ai-score-lbl">AI Score</span>
+                </div>
+            </div>
+            <div class="cand-skills">
+                <span class="skill-chip">React</span><span class="skill-chip">TypeScript</span>
+                <span class="skill-chip">Next.js</span><span class="skill-chip">Tailwind</span>
+            </div>
+            <div class="cand-card-footer">
+                <span class="pipeline-stage stage-applied"><i class="fa-solid fa-file-lines"></i> Screening</span>
+                <a href="#" class="btn-dossier"><i class="fa-solid fa-id-card"></i> Dossier</a>
+            </div>
+        </div>
+
+        <div class="cand-card">
+            <div class="cand-card-top">
+                <div class="cand-avatar" style="background:linear-gradient(135deg,#ec4899,#f472b6)">LK</div>
+                <div class="cand-info">
+                    <h3>Lisa Kim</h3>
+                    <p class="headline">Data Scientist &bull; Boston, MA</p>
+                    <div class="cand-meta">
+                        <span><i class="fa-solid fa-briefcase"></i> 5 yrs exp</span>
+                        <span><i class="fa-solid fa-graduation-cap"></i> Harvard</span>
+                    </div>
+                </div>
+                <div class="ai-score-badge">
+                    <span class="ai-score-num score-green">89</span>
+                    <span class="ai-score-lbl">AI Score</span>
+                </div>
+            </div>
+            <div class="cand-skills">
+                <span class="skill-chip">Python</span><span class="skill-chip">R</span>
+                <span class="skill-chip">Spark</span><span class="skill-chip">Tableau</span>
+            </div>
+            <div class="cand-card-footer">
+                <span class="pipeline-stage stage-shortlisted"><i class="fa-solid fa-star"></i> Shortlisted</span>
+                <a href="#" class="btn-dossier"><i class="fa-solid fa-id-card"></i> Dossier</a>
+            </div>
+        </div>
+
+        {% endif %}
+
+        <!-- Real DB candidates -->
+        {% for c in candidates %}
+        <div class="cand-card">
+            <div class="cand-card-top">
+                <div class="cand-avatar" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">
+                    {{ c.first_name[0] }}{{ c.last_name[0] }}
+                </div>
+                <div class="cand-info">
+                    <h3>{{ c.first_name }} {{ c.last_name }}</h3>
+                    <p class="headline">{{ c.headline or 'Candidate' }} &bull; {{ c.location or 'Remote' }}</p>
+                    <div class="cand-meta">
+                        <span><i class="fa-solid fa-briefcase"></i> {{ c.years_of_experience or 0 }} yrs</span>
+                    </div>
+                </div>
+                <div class="ai-score-badge">
+                    <span class="ai-score-num {% if c.resume_quality_score >= 80 %}score-green{% else %}score-amber{% endif %}">{{ c.resume_quality_score or '--' }}</span>
+                    <span class="ai-score-lbl">AI Score</span>
+                </div>
+            </div>
+            <div class="cand-skills">
+                {% for s in c.skills[:5] %}
+                <span class="skill-chip">{{ s.skill_name }}</span>
                 {% endfor %}
-            </tbody>
-        </table>
+            </div>
+            <div class="cand-card-footer">
+                <span class="pipeline-stage stage-applied">Applied</span>
+                <a href="/candidates/{{ c.id }}" class="btn-dossier"><i class="fa-solid fa-id-card"></i> Dossier</a>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

@@ -1,14 +1,221 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    /* Dashboard Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .stat-card {
+        background: #1e293b;
+        border: 1px solid #2d3a4e;
+        border-radius: 16px;
+        padding: 24px;
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        transition: all 0.25s;
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        border-radius: 16px 16px 0 0;
+    }
+    .stat-card:nth-child(1)::before { background: linear-gradient(90deg, #3b82f6, #6366f1); }
+    .stat-card:nth-child(2)::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+    .stat-card:nth-child(3)::before { background: linear-gradient(90deg, #10b981, #34d399); }
+    .stat-card:nth-child(4)::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.3); }
+
+    .stat-icon {
+        width: 48px; height: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+    .icon-blue { background: rgba(59,130,246,0.12); color: #60a5fa; }
+    .icon-purple { background: rgba(139,92,246,0.12); color: #a78bfa; }
+    .icon-green { background: rgba(16,185,129,0.12); color: #34d399; }
+    .icon-orange { background: rgba(245,158,11,0.12); color: #fbbf24; }
+
+    .stat-details { flex: 1; }
+    .stat-title { font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-size: 28px; font-weight: 800; color: #f1f5f9; margin: 4px 0; line-height: 1; }
+    .stat-trend { font-size: 12px; display: flex; align-items: center; gap: 4px; }
+    .stat-trend.positive { color: #34d399; }
+    .stat-trend.neutral { color: #94a3b8; }
+
+    /* Dashboard Split Layout */
+    .dashboard-split {
+        display: grid;
+        grid-template-columns: 1.6fr 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    /* Card styles */
+    .dash-card {
+        background: #1e293b;
+        border: 1px solid #2d3a4e;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    .dash-card-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .dash-card-header h3 {
+        font-size: 15px;
+        font-weight: 700;
+        color: #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .dash-card-header h3 i { color: #6366f1; }
+    .dash-card-header .subtitle { color: #64748b; font-size: 12px; margin-top: 2px; }
+    .live-pulse {
+        font-size: 11px; font-weight: 700; color: #34d399;
+        display: flex; align-items: center; gap: 6px;
+        text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .pulse-dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: #34d399;
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52,211,153,0.4); }
+        50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(52,211,153,0); }
+    }
+
+    /* Ranking Table */
+    .ranking-table { width: 100%; border-collapse: collapse; }
+    .ranking-table th {
+        padding: 12px 20px;
+        text-align: left;
+        font-size: 11px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background: rgba(0,0,0,0.15);
+    }
+    .ranking-table td {
+        padding: 14px 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        font-size: 13px;
+        color: #cbd5e1;
+    }
+    .ranking-table tbody tr {
+        transition: background 0.15s;
+    }
+    .ranking-table tbody tr:hover {
+        background: rgba(99,102,241,0.06);
+    }
+
+    /* Rank badge */
+    .rank-badge {
+        width: 28px; height: 28px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 800;
+    }
+    .rank-gold { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #1e293b; }
+    .rank-silver { background: linear-gradient(135deg, #94a3b8, #cbd5e1); color: #1e293b; }
+    .rank-bronze { background: linear-gradient(135deg, #b45309, #d97706); color: white; }
+
+    .cand-cell strong { color: #f1f5f9; font-weight: 600; }
+    .cand-cell small { color: #64748b; font-size: 11px; display: block; margin-top: 2px; }
+
+    .score-pill {
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        display: inline-block;
+    }
+    .score-high { background: rgba(16,185,129,0.12); color: #34d399; }
+    .score-med { background: rgba(245,158,11,0.12); color: #fbbf24; }
+    .badge-success { background: rgba(16,185,129,0.15); color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .badge-warning { background: rgba(245,158,11,0.15); color: #fbbf24; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+
+    .xai-tag {
+        font-size: 11px; color: #94a3b8;
+        display: flex; align-items: center; gap: 5px;
+    }
+    .xai-tag i { color: #6366f1; }
+
+    /* Chart Card */
+    .chart-wrapper { padding: 20px 24px; height: 320px; }
+
+    /* Activity Feed */
+    .activity-feed { padding: 0; }
+    .activity-item {
+        display: flex; gap: 14px; align-items: flex-start;
+        padding: 16px 24px;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        transition: background 0.15s;
+    }
+    .activity-item:hover { background: rgba(99,102,241,0.04); }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-icon {
+        width: 36px; height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+    .ai-blue { background: rgba(99,102,241,0.12); color: #818cf8; }
+    .ai-green { background: rgba(16,185,129,0.12); color: #34d399; }
+    .ai-orange { background: rgba(245,158,11,0.12); color: #fbbf24; }
+    .ai-purple { background: rgba(139,92,246,0.12); color: #a78bfa; }
+
+    .activity-text { flex: 1; }
+    .activity-text p { color: #cbd5e1; font-size: 13px; line-height: 1.5; }
+    .activity-text p strong { color: #f1f5f9; }
+    .activity-text .time { color: #475569; font-size: 11px; margin-top: 4px; }
+
+    /* Bottom Row */
+    .dashboard-bottom {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    @media (max-width: 1200px) {
+        .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        .dashboard-split { grid-template-columns: 1fr; }
+        .dashboard-bottom { grid-template-columns: 1fr; }
+    }
+</style>
+
 <div class="dashboard-container">
-    <!-- Top Stat Cards -->
+    <!-- Stats Row -->
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-icon icon-blue"><i class="fa-solid fa-briefcase"></i></div>
             <div class="stat-details">
                 <span class="stat-title">Active Job Openings</span>
-                <h3 class="stat-value" id="metric-active-jobs">12</h3>
+                <h3 class="stat-value">12</h3>
                 <span class="stat-trend positive"><i class="fa-solid fa-arrow-up"></i> +2 this week</span>
             </div>
         </div>
@@ -16,97 +223,166 @@
             <div class="stat-icon icon-purple"><i class="fa-solid fa-file-invoice"></i></div>
             <div class="stat-details">
                 <span class="stat-title">Resumes AI Screened</span>
-                <h3 class="stat-value" id="metric-screened">1,428</h3>
+                <h3 class="stat-value">1,428</h3>
                 <span class="stat-trend positive"><i class="fa-solid fa-bolt"></i> Real-time parsed</span>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon icon-green"><i class="fa-solid fa-bullseye"></i></div>
             <div class="stat-details">
-                <span class="stat-title">AI Shortlisting Match Rate</span>
-                <h3 class="stat-value" id="metric-match-rate">78.4%</h3>
-                <span class="stat-trend positive"><i class="fa-solid fa-arrow-up"></i> High precision</span>
+                <span class="stat-title">AI Match Rate</span>
+                <h3 class="stat-value">78.4%</h3>
+                <span class="stat-trend positive"><i class="fa-solid fa-arrow-up"></i> +3.2% this month</span>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon icon-orange"><i class="fa-solid fa-calendar-check"></i></div>
             <div class="stat-details">
-                <span class="stat-title">Upcoming Interviews</span>
-                <h3 class="stat-value" id="metric-interviews">24</h3>
+                <span class="stat-title">Interviews Scheduled</span>
+                <h3 class="stat-value">24</h3>
                 <span class="stat-trend neutral"><i class="fa-solid fa-clock"></i> Next 48 hrs</span>
             </div>
         </div>
     </div>
 
-    <!-- Main Dashboard Split: Live Match Stream & Funnel Analytics -->
+    <!-- Main Split: Rankings + Chart -->
     <div class="dashboard-split">
-        <!-- Live Candidate Ranking & XAI Stream -->
-        <div class="card live-rankings-card">
-            <div class="card-header">
+        <div class="dash-card">
+            <div class="dash-card-header">
                 <div>
-                    <h3><i class="fa-solid fa-ranking-star"></i> Real-Time Candidate Match & XAI Stream</h3>
-                    <p class="subtitle">Live ranking recalculation powered by Sentence-Transformers & Hybrid scoring</p>
+                    <h3><i class="fa-solid fa-ranking-star"></i> Real-Time Candidate Match Stream</h3>
+                    <p class="subtitle">Live ranking powered by Sentence-Transformers & Hybrid scoring</p>
                 </div>
                 <span class="live-pulse"><span class="pulse-dot"></span> LIVE</span>
             </div>
-            <div class="table-responsive">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Candidate</th>
-                            <th>Target Role</th>
-                            <th>Match Score</th>
-                            <th>AI Recommendation</th>
-                            <th>XAI Strengths & Factors</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ranking-table-body">
-                        <tr>
-                            <td><span class="rank-badge gold">#1</span></td>
-                            <td>
-                                <strong>Alex Rivera</strong>
-                                <small class="text-muted d-block">Senior ML Engineer • 6 yrs exp</small>
-                            </td>
-                            <td>Lead Python Architect</td>
-                            <td><div class="score-pill score-high">94.8%</div></td>
-                            <td><span class="badge badge-success">SHORTLIST</span></td>
-                            <td><span class="xai-tag"><i class="fa-solid fa-check"></i> Matches 9/10 Skills (Python, PyTorch, Celery)</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="rank-badge silver">#2</span></td>
-                            <td>
-                                <strong>Sarah Chen</strong>
-                                <small class="text-muted d-block">Full Stack Developer • 4 yrs exp</small>
-                            </td>
-                            <td>Backend Engineer</td>
-                            <td><div class="score-pill score-high">88.2%</div></td>
-                            <td><span class="badge badge-success">SHORTLIST</span></td>
-                            <td><span class="xai-tag"><i class="fa-solid fa-check"></i> Strong semantic job match</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="rank-badge bronze">#3</span></td>
-                            <td>
-                                <strong>David Kim</strong>
-                                <small class="text-muted d-block">Software Engineer • 2 yrs exp</small>
-                            </td>
-                            <td>Backend Engineer</td>
-                            <td><div class="score-pill score-med">68.5%</div></td>
-                            <td><span class="badge badge-warning">REVIEW</span></td>
-                            <td><span class="xai-tag text-warning"><i class="fa-solid fa-triangle-exclamation"></i> Missing Docker experience</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <table class="ranking-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Candidate</th>
+                        <th>Target Role</th>
+                        <th>Score</th>
+                        <th>Action</th>
+                        <th>XAI Factors</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="rank-badge rank-gold">#1</span></td>
+                        <td class="cand-cell"><strong>Alex Rivera</strong><small>Senior ML Engineer &bull; 6 yrs</small></td>
+                        <td>Lead Python Architect</td>
+                        <td><span class="score-pill score-high">94.8%</span></td>
+                        <td><span class="badge-success">SHORTLIST</span></td>
+                        <td><span class="xai-tag"><i class="fa-solid fa-check-circle"></i> 9/10 Skills matched</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge rank-silver">#2</span></td>
+                        <td class="cand-cell"><strong>Sarah Chen</strong><small>Full Stack Developer &bull; 4 yrs</small></td>
+                        <td>Backend Engineer</td>
+                        <td><span class="score-pill score-high">88.2%</span></td>
+                        <td><span class="badge-success">SHORTLIST</span></td>
+                        <td><span class="xai-tag"><i class="fa-solid fa-check-circle"></i> Strong semantic match</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge rank-bronze">#3</span></td>
+                        <td class="cand-cell"><strong>David Kim</strong><small>Software Engineer &bull; 2 yrs</small></td>
+                        <td>Backend Engineer</td>
+                        <td><span class="score-pill score-med">68.5%</span></td>
+                        <td><span class="badge-warning">REVIEW</span></td>
+                        <td><span class="xai-tag"><i class="fa-solid fa-triangle-exclamation" style="color:#fbbf24"></i> Missing Docker exp</span></td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
-        <!-- Funnel Analytics Chart -->
-        <div class="card analytics-chart-card">
-            <div class="card-header">
+        <div class="dash-card">
+            <div class="dash-card-header">
                 <h3><i class="fa-solid fa-chart-column"></i> ATS Recruitment Funnel</h3>
             </div>
             <div class="chart-wrapper">
                 <canvas id="funnelChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom: Activity Feed + Quick Stats -->
+    <div class="dashboard-bottom">
+        <div class="dash-card">
+            <div class="dash-card-header">
+                <h3><i class="fa-solid fa-timeline"></i> AI Activity Feed</h3>
+            </div>
+            <div class="activity-feed">
+                <div class="activity-item">
+                    <div class="activity-icon ai-green"><i class="fa-solid fa-robot"></i></div>
+                    <div class="activity-text">
+                        <p><strong>AI Engine</strong> shortlisted <strong>Alex Rivera</strong> for Lead Python Architect with 94.8% match</p>
+                        <span class="time">2 minutes ago</span>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon ai-blue"><i class="fa-solid fa-file-lines"></i></div>
+                    <div class="activity-text">
+                        <p><strong>Resume Parser</strong> processed 12 new applications for Senior Backend Dev role</p>
+                        <span class="time">8 minutes ago</span>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon ai-orange"><i class="fa-solid fa-calendar-plus"></i></div>
+                    <div class="activity-text">
+                        <p>Interview scheduled: <strong>Sarah Chen</strong> &rarr; Backend Engineer, Round 2 (Tomorrow 2:00 PM)</p>
+                        <span class="time">15 minutes ago</span>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon ai-purple"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                    <div class="activity-text">
+                        <p><strong>Bias Auditor</strong> completed EEOC compliance scan &mdash; all funnels pass Four-Fifths rule</p>
+                        <span class="time">32 minutes ago</span>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon ai-green"><i class="fa-solid fa-handshake"></i></div>
+                    <div class="activity-text">
+                        <p><strong>David Vance</strong> accepted offer for DevOps Lead &mdash; starting Sep 15</p>
+                        <span class="time">1 hour ago</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dash-card">
+            <div class="dash-card-header">
+                <h3><i class="fa-solid fa-gauge-high"></i> Platform Health</h3>
+            </div>
+            <div class="activity-feed">
+                <div class="activity-item">
+                    <div class="activity-icon ai-green"><i class="fa-solid fa-check-circle"></i></div>
+                    <div class="activity-text">
+                        <p><strong>ML Pipeline</strong> &mdash; Embedding model loaded</p>
+                        <span class="time">all-MiniLM-L6-v2 &bull; 384 dimensions</span>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon ai-green"><i class="fa-solid fa-database"></i></div>
+                    <div class="activity-text">
+                        <p><strong>Database</strong> &mdash; SQLite connected (local mode)</p>
+                        <span class="time">Latency: 0.2ms</span>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon ai-blue"><i class="fa-solid fa-server"></i></div>
+                    <div class="activity-text">
+                        <p><strong>API Gateway</strong> &mdash; 14 endpoints registered</p>
+                        <span class="time">REST v1 + WebSocket</span>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon ai-orange"><i class="fa-solid fa-shield-check"></i></div>
+                    <div class="activity-text">
+                        <p><strong>Security</strong> &mdash; JWT auth + RBAC active</p>
+                        <span class="time">AES-256 at rest</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

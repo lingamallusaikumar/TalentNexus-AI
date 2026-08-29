@@ -351,3 +351,55 @@ body {
 .chart-wrapper {
     height: 300px;
 }
+
+/* Page containers and headers */
+.page-container { padding: 10px 0; }
+.page-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 24px;
+}
+.page-header h2 { color: var(--text-primary); font-size: 22px; }
+.page-header .subtitle { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
+
+/* Buttons */
+.btn {
+    padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 13px;
+    cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 8px;
+    text-decoration: none; transition: all 0.2s;
+}
+.btn-primary { background: var(--accent-blue); color: white; }
+.btn-primary:hover { background: #2563eb; }
+.btn-secondary { background: var(--bg-card); color: var(--text-secondary); border: 1px solid var(--border-color); }
+.btn-secondary:hover { background: var(--border-color); color: var(--text-primary); }
+
+/* Forms */
+.form-group { margin-bottom: 20px; }
+.form-group label {
+    display: block; color: var(--text-secondary); font-size: 13px;
+    font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.form-control {
+    width: 100%; padding: 12px 16px; border-radius: 8px;
+    border: 1px solid var(--border-color); background: var(--bg-secondary);
+    color: var(--text-primary); font-size: 14px; font-family: inherit;
+    transition: border-color 0.2s;
+}
+.form-control:focus { outline: none; border-color: var(--accent-blue); }
+textarea.form-control { resize: vertical; }
+select.form-control { appearance: auto; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.form-actions { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border-color); }
+
+/* Detail grids */
+.detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; padding: 20px 0; }
+.detail-item .detail-label { display: block; color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.detail-item .detail-value { color: var(--text-primary); font-size: 15px; font-weight: 500; }
+.description-block { padding-top: 20px; border-top: 1px solid var(--border-color); }
+.description-block h4 { color: var(--text-primary); margin-bottom: 10px; }
+.description-block p { color: var(--text-secondary); line-height: 1.7; }
+
+/* Badges */
+.badge-info { background: var(--accent-blue); color: white; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+.text-muted { color: var(--text-secondary); }
+.assessment-body { padding: 20px 0; }
+

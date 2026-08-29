@@ -1,44 +1,410 @@
 {% extends 'base.html' %}
 
-{% block title %}Assessments & Tests | TalentNexus AI{% endblock %}
+{% block title %}Technical Assessments & Question Bank | TalentNexus AI{% endblock %}
 
 {% block content %}
+<style>
+    /* Stats */
+    .assessment-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 24px;
+    }
+    .astat-card {
+        background: #1e293b;
+        border: 1px solid #2d3a4e;
+        border-radius: 12px;
+        padding: 18px 20px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    .astat-icon {
+        width: 42px; height: 42px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 17px; flex-shrink: 0;
+    }
+    .astat-val { font-size: 24px; font-weight: 800; color: #f1f5f9; }
+    .astat-lbl { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px; }
+
+    /* Tab Bar */
+    .tab-bar {
+        display: flex; gap: 4px;
+        margin-bottom: 24px;
+        background: #111827;
+        border: 1px solid #1e293b;
+        border-radius: 12px;
+        padding: 4px;
+        width: fit-content;
+    }
+    .tab-btn {
+        padding: 9px 20px;
+        border-radius: 9px;
+        border: none; background: none;
+        color: #64748b;
+        font-size: 13px; font-weight: 600;
+        font-family: inherit; cursor: pointer;
+        transition: all 0.2s;
+        display: flex; align-items: center; gap: 7px;
+    }
+    .tab-btn.active {
+        background: #1e293b;
+        color: #e2e8f0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .tab-btn:hover:not(.active) { color: #94a3b8; }
+
+    /* Assessment Cards Grid */
+    .assessment-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 16px;
+    }
+    .assessment-card {
+        background: #1e293b;
+        border: 1px solid #2d3a4e;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.25s;
+    }
+    .assessment-card:hover {
+        border-color: rgba(99,102,241,0.35);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+    }
+    .assessment-card-header {
+        padding: 20px;
+        background: rgba(0,0,0,0.1);
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+    }
+    .assessment-icon {
+        width: 46px; height: 46px;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px; flex-shrink: 0;
+    }
+    .assessment-card-header h3 {
+        font-size: 15px; font-weight: 700;
+        color: #f1f5f9; line-height: 1.3;
+    }
+    .assessment-card-header .a-type {
+        font-size: 11px; color: #64748b;
+        margin-top: 4px; text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .assessment-card-body { padding: 18px 20px; }
+    .a-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    .a-metric {
+        background: rgba(0,0,0,0.15);
+        border-radius: 10px;
+        padding: 10px;
+        text-align: center;
+    }
+    .a-metric-val {
+        font-size: 18px; font-weight: 800;
+        color: #f1f5f9; display: block;
+    }
+    .a-metric-lbl {
+        font-size: 10px; color: #64748b;
+        text-transform: uppercase; letter-spacing: 0.4px;
+    }
+
+    .topic-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .topic-chip {
+        font-size: 11px; padding: 3px 9px;
+        border-radius: 6px;
+        background: rgba(99,102,241,0.08);
+        color: #a5b4fc;
+        border: 1px solid rgba(99,102,241,0.12);
+    }
+
+    .a-progress { margin-bottom: 14px; }
+    .a-progress-label {
+        display: flex; justify-content: space-between;
+        font-size: 11px; color: #64748b; margin-bottom: 5px;
+    }
+    .a-progress-bar {
+        height: 5px; border-radius: 3px;
+        background: rgba(255,255,255,0.06);
+        overflow: hidden;
+    }
+    .a-progress-fill { height: 100%; border-radius: 3px; }
+
+    .a-card-footer {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 14px 20px;
+        border-top: 1px solid rgba(255,255,255,0.04);
+        background: rgba(0,0,0,0.08);
+    }
+    .a-status { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .a-status-active { background: rgba(16,185,129,0.12); color: #34d399; }
+    .a-status-draft { background: rgba(148,163,184,0.12); color: #94a3b8; }
+
+    .btn-preview {
+        padding: 7px 14px; border-radius: 8px;
+        background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25);
+        color: #818cf8; font-size: 12px; font-weight: 600;
+        font-family: inherit; cursor: pointer;
+        text-decoration: none; display: flex; align-items: center; gap: 6px;
+        transition: all 0.2s;
+    }
+    .btn-preview:hover { background: rgba(99,102,241,0.18); }
+
+    @media (max-width: 900px) {
+        .assessment-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+</style>
+
 <div class="page-container">
     <div class="page-header">
         <div>
             <h2><i class="fa-solid fa-file-circle-check"></i> Technical Assessments & Question Bank</h2>
-            <p class="subtitle">Create MCQ and coding evaluations with automated grading</p>
+            <p class="subtitle">Create MCQ and coding evaluations with AI-automated grading pipelines</p>
         </div>
         <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> New Assessment</button>
     </div>
 
-    <div class="card">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Assessment Title</th>
-                    <th>Time Limit</th>
-                    <th>Passing Score</th>
-                    <th>Questions</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for a in assessments %}
-                <tr>
-                    <td><strong>{{ a.title }}</strong></td>
-                    <td>{{ a.time_limit_minutes }} mins</td>
-                    <td>{{ a.passing_score_percentage }}%</td>
-                    <td>{{ a.questions|length }} questions</td>
-                    <td><span class="badge badge-success">Active</span></td>
-                    <td>
-                        <a href="/assessments/{{ a.id }}/take" class="btn btn-sm btn-secondary">Preview Test</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <!-- Stats -->
+    <div class="assessment-stats">
+        <div class="astat-card">
+            <div class="astat-icon" style="background:rgba(99,102,241,0.1);color:#818cf8"><i class="fa-solid fa-clipboard-list"></i></div>
+            <div><div class="astat-val">24</div><div class="astat-lbl">Total Assessments</div></div>
+        </div>
+        <div class="astat-card">
+            <div class="astat-icon" style="background:rgba(16,185,129,0.1);color:#34d399"><i class="fa-solid fa-circle-check"></i></div>
+            <div><div class="astat-val">1,847</div><div class="astat-lbl">Completions</div></div>
+        </div>
+        <div class="astat-card">
+            <div class="astat-icon" style="background:rgba(245,158,11,0.1);color:#fbbf24"><i class="fa-solid fa-bullseye"></i></div>
+            <div><div class="astat-val">72.3%</div><div class="astat-lbl">Avg Pass Rate</div></div>
+        </div>
+        <div class="astat-card">
+            <div class="astat-icon" style="background:rgba(239,68,68,0.1);color:#f87171"><i class="fa-solid fa-database"></i></div>
+            <div><div class="astat-val">12,400</div><div class="astat-lbl">Questions in Bank</div></div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-bar">
+        <button class="tab-btn active"><i class="fa-solid fa-layer-group"></i> All Assessments</button>
+        <button class="tab-btn"><i class="fa-solid fa-code"></i> Coding Tests</button>
+        <button class="tab-btn"><i class="fa-solid fa-circle-dot"></i> MCQ Banks</button>
+        <button class="tab-btn"><i class="fa-solid fa-chart-bar"></i> Analytics</button>
+    </div>
+
+    <!-- Assessment Cards -->
+    <div class="assessment-grid">
+
+        {% if not assessments %}
+        <!-- Demo cards -->
+        <div class="assessment-card">
+            <div class="assessment-card-header">
+                <div class="assessment-icon" style="background:rgba(99,102,241,0.12);color:#818cf8"><i class="fa-brands fa-python"></i></div>
+                <div>
+                    <h3>Python Engineering Assessment</h3>
+                    <p class="a-type"><i class="fa-solid fa-code"></i> Coding + MCQ &bull; Senior Level</p>
+                </div>
+            </div>
+            <div class="assessment-card-body">
+                <div class="a-metrics">
+                    <div class="a-metric"><span class="a-metric-val">45</span><span class="a-metric-lbl">Questions</span></div>
+                    <div class="a-metric"><span class="a-metric-val">90</span><span class="a-metric-lbl">Minutes</span></div>
+                    <div class="a-metric"><span class="a-metric-val">70%</span><span class="a-metric-lbl">Pass Score</span></div>
+                </div>
+                <div class="topic-chips">
+                    <span class="topic-chip">OOP</span><span class="topic-chip">Async/Await</span>
+                    <span class="topic-chip">Data Structures</span><span class="topic-chip">REST APIs</span>
+                </div>
+                <div class="a-progress">
+                    <div class="a-progress-label"><span>Completion rate</span><span>78%</span></div>
+                    <div class="a-progress-bar"><div class="a-progress-fill" style="width:78%;background:linear-gradient(90deg,#6366f1,#8b5cf6)"></div></div>
+                </div>
+            </div>
+            <div class="a-card-footer">
+                <span class="a-status a-status-active"><i class="fa-solid fa-circle"></i> Active</span>
+                <a href="#" class="btn-preview"><i class="fa-solid fa-eye"></i> Preview</a>
+            </div>
+        </div>
+
+        <div class="assessment-card">
+            <div class="assessment-card-header">
+                <div class="assessment-icon" style="background:rgba(6,182,212,0.12);color:#22d3ee"><i class="fa-solid fa-database"></i></div>
+                <div>
+                    <h3>SQL & Database Fundamentals</h3>
+                    <p class="a-type"><i class="fa-solid fa-circle-dot"></i> MCQ + Scenario &bull; Mid Level</p>
+                </div>
+            </div>
+            <div class="assessment-card-body">
+                <div class="a-metrics">
+                    <div class="a-metric"><span class="a-metric-val">30</span><span class="a-metric-lbl">Questions</span></div>
+                    <div class="a-metric"><span class="a-metric-val">60</span><span class="a-metric-lbl">Minutes</span></div>
+                    <div class="a-metric"><span class="a-metric-val">65%</span><span class="a-metric-lbl">Pass Score</span></div>
+                </div>
+                <div class="topic-chips">
+                    <span class="topic-chip">JOINs</span><span class="topic-chip">Indexing</span>
+                    <span class="topic-chip">Window Fns</span><span class="topic-chip">Query Optim.</span>
+                </div>
+                <div class="a-progress">
+                    <div class="a-progress-label"><span>Completion rate</span><span>85%</span></div>
+                    <div class="a-progress-bar"><div class="a-progress-fill" style="width:85%;background:linear-gradient(90deg,#06b6d4,#22d3ee)"></div></div>
+                </div>
+            </div>
+            <div class="a-card-footer">
+                <span class="a-status a-status-active"><i class="fa-solid fa-circle"></i> Active</span>
+                <a href="#" class="btn-preview"><i class="fa-solid fa-eye"></i> Preview</a>
+            </div>
+        </div>
+
+        <div class="assessment-card">
+            <div class="assessment-card-header">
+                <div class="assessment-icon" style="background:rgba(16,185,129,0.12);color:#34d399"><i class="fa-brands fa-react"></i></div>
+                <div>
+                    <h3>React & Frontend Architecture</h3>
+                    <p class="a-type"><i class="fa-solid fa-code"></i> Coding + MCQ &bull; Senior Level</p>
+                </div>
+            </div>
+            <div class="assessment-card-body">
+                <div class="a-metrics">
+                    <div class="a-metric"><span class="a-metric-val">40</span><span class="a-metric-lbl">Questions</span></div>
+                    <div class="a-metric"><span class="a-metric-val">75</span><span class="a-metric-lbl">Minutes</span></div>
+                    <div class="a-metric"><span class="a-metric-val">72%</span><span class="a-metric-lbl">Pass Score</span></div>
+                </div>
+                <div class="topic-chips">
+                    <span class="topic-chip">Hooks</span><span class="topic-chip">Context API</span>
+                    <span class="topic-chip">Performance</span><span class="topic-chip">TypeScript</span>
+                </div>
+                <div class="a-progress">
+                    <div class="a-progress-label"><span>Completion rate</span><span>71%</span></div>
+                    <div class="a-progress-bar"><div class="a-progress-fill" style="width:71%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div>
+                </div>
+            </div>
+            <div class="a-card-footer">
+                <span class="a-status a-status-active"><i class="fa-solid fa-circle"></i> Active</span>
+                <a href="#" class="btn-preview"><i class="fa-solid fa-eye"></i> Preview</a>
+            </div>
+        </div>
+
+        <div class="assessment-card">
+            <div class="assessment-card-header">
+                <div class="assessment-icon" style="background:rgba(245,158,11,0.12);color:#fbbf24"><i class="fa-brands fa-aws"></i></div>
+                <div>
+                    <h3>AWS Cloud Architecture</h3>
+                    <p class="a-type"><i class="fa-solid fa-circle-dot"></i> MCQ + Case Study &bull; Senior Level</p>
+                </div>
+            </div>
+            <div class="assessment-card-body">
+                <div class="a-metrics">
+                    <div class="a-metric"><span class="a-metric-val">50</span><span class="a-metric-lbl">Questions</span></div>
+                    <div class="a-metric"><span class="a-metric-val">120</span><span class="a-metric-lbl">Minutes</span></div>
+                    <div class="a-metric"><span class="a-metric-val">75%</span><span class="a-metric-lbl">Pass Score</span></div>
+                </div>
+                <div class="topic-chips">
+                    <span class="topic-chip">EC2/ECS</span><span class="topic-chip">IAM</span>
+                    <span class="topic-chip">VPC</span><span class="topic-chip">Lambda</span>
+                </div>
+                <div class="a-progress">
+                    <div class="a-progress-label"><span>Completion rate</span><span>62%</span></div>
+                    <div class="a-progress-bar"><div class="a-progress-fill" style="width:62%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div>
+                </div>
+            </div>
+            <div class="a-card-footer">
+                <span class="a-status a-status-active"><i class="fa-solid fa-circle"></i> Active</span>
+                <a href="#" class="btn-preview"><i class="fa-solid fa-eye"></i> Preview</a>
+            </div>
+        </div>
+
+        <div class="assessment-card">
+            <div class="assessment-card-header">
+                <div class="assessment-icon" style="background:rgba(139,92,246,0.12);color:#a78bfa"><i class="fa-solid fa-robot"></i></div>
+                <div>
+                    <h3>Machine Learning Fundamentals</h3>
+                    <p class="a-type"><i class="fa-solid fa-circle-dot"></i> MCQ + Maths &bull; Expert Level</p>
+                </div>
+            </div>
+            <div class="assessment-card-body">
+                <div class="a-metrics">
+                    <div class="a-metric"><span class="a-metric-val">35</span><span class="a-metric-lbl">Questions</span></div>
+                    <div class="a-metric"><span class="a-metric-val">90</span><span class="a-metric-lbl">Minutes</span></div>
+                    <div class="a-metric"><span class="a-metric-val">80%</span><span class="a-metric-lbl">Pass Score</span></div>
+                </div>
+                <div class="topic-chips">
+                    <span class="topic-chip">Gradient Descent</span><span class="topic-chip">CNNs</span>
+                    <span class="topic-chip">Feature Eng.</span>
+                </div>
+                <div class="a-progress">
+                    <div class="a-progress-label"><span>Completion rate</span><span>54%</span></div>
+                    <div class="a-progress-bar"><div class="a-progress-fill" style="width:54%;background:linear-gradient(90deg,#8b5cf6,#a78bfa)"></div></div>
+                </div>
+            </div>
+            <div class="a-card-footer">
+                <span class="a-status a-status-active"><i class="fa-solid fa-circle"></i> Active</span>
+                <a href="#" class="btn-preview"><i class="fa-solid fa-eye"></i> Preview</a>
+            </div>
+        </div>
+
+        <div class="assessment-card">
+            <div class="assessment-card-header">
+                <div class="assessment-icon" style="background:rgba(148,163,184,0.1);color:#94a3b8"><i class="fa-solid fa-pen-ruler"></i></div>
+                <div>
+                    <h3>System Design Challenge</h3>
+                    <p class="a-type"><i class="fa-solid fa-code"></i> Open-ended &bull; Staff Level</p>
+                </div>
+            </div>
+            <div class="assessment-card-body">
+                <div class="a-metrics">
+                    <div class="a-metric"><span class="a-metric-val">5</span><span class="a-metric-lbl">Scenarios</span></div>
+                    <div class="a-metric"><span class="a-metric-val">180</span><span class="a-metric-lbl">Minutes</span></div>
+                    <div class="a-metric"><span class="a-metric-val">--</span><span class="a-metric-lbl">AI Graded</span></div>
+                </div>
+                <div class="topic-chips">
+                    <span class="topic-chip">Scalability</span><span class="topic-chip">CAP Theorem</span>
+                    <span class="topic-chip">Microservices</span>
+                </div>
+                <div class="a-progress">
+                    <div class="a-progress-label"><span>Completion rate</span><span>0% (Draft)</span></div>
+                    <div class="a-progress-bar"><div class="a-progress-fill" style="width:0%;background:#374151"></div></div>
+                </div>
+            </div>
+            <div class="a-card-footer">
+                <span class="a-status a-status-draft"><i class="fa-solid fa-pencil"></i> Draft</span>
+                <a href="#" class="btn-preview"><i class="fa-solid fa-pen"></i> Edit</a>
+            </div>
+        </div>
+        {% endif %}
+
+        {% for a in assessments %}
+        <div class="assessment-card">
+            <div class="assessment-card-header">
+                <div class="assessment-icon" style="background:rgba(99,102,241,0.12);color:#818cf8"><i class="fa-solid fa-clipboard-check"></i></div>
+                <div>
+                    <h3>{{ a.title }}</h3>
+                    <p class="a-type"><i class="fa-solid fa-circle-dot"></i> Assessment</p>
+                </div>
+            </div>
+            <div class="assessment-card-body">
+                <div class="a-metrics">
+                    <div class="a-metric"><span class="a-metric-val">{{ a.questions|length }}</span><span class="a-metric-lbl">Questions</span></div>
+                    <div class="a-metric"><span class="a-metric-val">{{ a.time_limit_minutes }}</span><span class="a-metric-lbl">Minutes</span></div>
+                    <div class="a-metric"><span class="a-metric-val">{{ a.passing_score_percentage }}%</span><span class="a-metric-lbl">Pass Score</span></div>
+                </div>
+            </div>
+            <div class="a-card-footer">
+                <span class="a-status a-status-active">Active</span>
+                <a href="/assessments/{{ a.id }}/take" class="btn-preview"><i class="fa-solid fa-eye"></i> Preview</a>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

@@ -1,33 +1,341 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In | TalentNexus AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #050816;
+            --bg-card: rgba(15, 23, 42, 0.85);
+            --bg-input: rgba(15, 23, 42, 0.6);
+            --border: rgba(99, 102, 241, 0.2);
+            --border-focus: rgba(99, 102, 241, 0.6);
+            --text-white: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --green: #10b981;
+            --glass: rgba(255, 255, 255, 0.03);
+        }
 
-{% block title %}Login | TalentNexus AI{% endblock %}
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
 
-{% block content %}
-<div class="auth-wrapper">
-    <div class="auth-card">
-        <div class="auth-header">
-            <i class="fa-solid fa-brain-circuit auth-icon"></i>
-            <h2>Welcome to TalentNexus AI</h2>
-            <p>Enterprise Recruitment & Screening Platform</p>
+        /* Animated gradient background */
+        body::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 20%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
+                        radial-gradient(ellipse at 50% 80%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+            animation: bgShift 15s ease-in-out infinite alternate;
+        }
+        @keyframes bgShift {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-5%, 3%) rotate(3deg); }
+        }
+
+        /* Floating orbs */
+        .orb {
+            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4;
+            animation: float 8s ease-in-out infinite;
+        }
+        .orb-1 { width: 300px; height: 300px; background: rgba(99,102,241,0.15); top: 10%; left: 15%; animation-delay: 0s; }
+        .orb-2 { width: 200px; height: 200px; background: rgba(16,185,129,0.12); bottom: 15%; right: 20%; animation-delay: 3s; }
+        .orb-3 { width: 150px; height: 150px; background: rgba(139,92,246,0.1); top: 60%; left: 60%; animation-delay: 5s; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-30px); }
+        }
+
+        /* Login card */
+        .login-container {
+            position: relative; z-index: 10;
+            width: 100%; max-width: 440px; padding: 20px;
+        }
+        .login-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 48px 40px;
+            box-shadow: 0 0 80px rgba(99,102,241,0.08), 0 25px 50px rgba(0,0,0,0.4);
+        }
+
+        /* Brand */
+        .brand {
+            text-align: center; margin-bottom: 36px;
+        }
+        .brand-logo {
+            width: 64px; height: 64px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            border-radius: 18px;
+            display: inline-flex; align-items: center; justify-content: center;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px var(--accent-glow);
+        }
+        .brand-logo i { font-size: 28px; color: white; }
+        .brand h1 {
+            font-size: 26px; font-weight: 800; color: var(--text-white);
+            letter-spacing: -0.5px;
+        }
+        .brand h1 span {
+            background: linear-gradient(135deg, var(--accent), var(--green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .brand p {
+            color: var(--text-muted); font-size: 14px; margin-top: 8px;
+        }
+
+        /* Form */
+        .form-group { margin-bottom: 22px; position: relative; }
+        .form-group label {
+            display: block; font-size: 12px; font-weight: 600;
+            color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 0.8px; margin-bottom: 8px;
+        }
+        .input-wrapper {
+            position: relative;
+        }
+        .input-wrapper i {
+            position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+            color: var(--text-muted); font-size: 14px;
+            transition: color 0.3s;
+        }
+        .form-input {
+            width: 100%; padding: 14px 16px 14px 44px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-white);
+            font-size: 14px; font-family: inherit;
+            transition: all 0.3s;
+            outline: none;
+        }
+        .form-input::placeholder { color: rgba(148, 163, 184, 0.5); }
+        .form-input:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+        }
+        .form-input:focus + i,
+        .input-wrapper:focus-within i { color: var(--accent); }
+
+        /* Password toggle */
+        .toggle-password {
+            position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; color: var(--text-muted);
+            cursor: pointer; font-size: 14px; padding: 4px;
+            transition: color 0.2s;
+        }
+        .toggle-password:hover { color: var(--text-white); }
+
+        /* Remember / forgot row */
+        .form-options {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 28px;
+        }
+        .remember-me {
+            display: flex; align-items: center; gap: 8px;
+            color: var(--text-muted); font-size: 13px; cursor: pointer;
+        }
+        .remember-me input[type="checkbox"] {
+            width: 16px; height: 16px; accent-color: var(--accent);
+            border-radius: 4px; cursor: pointer;
+        }
+        .forgot-link {
+            color: var(--accent); font-size: 13px; text-decoration: none;
+            font-weight: 500; transition: color 0.2s;
+        }
+        .forgot-link:hover { color: var(--accent-hover); }
+
+        /* Submit button */
+        .btn-login {
+            width: 100%; padding: 15px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            border: none; border-radius: 12px;
+            color: white; font-size: 15px; font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 24px var(--accent-glow);
+            letter-spacing: 0.3px;
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px var(--accent-glow);
+        }
+        .btn-login:active { transform: translateY(0); }
+
+        /* Divider */
+        .divider {
+            display: flex; align-items: center; gap: 16px;
+            margin: 28px 0;
+        }
+        .divider::before, .divider::after {
+            content: ''; flex: 1; height: 1px;
+            background: var(--border);
+        }
+        .divider span { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* SSO buttons */
+        .sso-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .btn-sso {
+            padding: 12px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-muted);
+            font-size: 13px; font-weight: 500; font-family: inherit;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: all 0.2s;
+        }
+        .btn-sso:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(148,163,184,0.3);
+            color: var(--text-white);
+        }
+        .btn-sso i { font-size: 16px; }
+
+        /* Footer */
+        .login-footer {
+            text-align: center; margin-top: 28px; padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+        .login-footer p {
+            color: var(--text-muted); font-size: 13px;
+        }
+        .login-footer a {
+            color: var(--accent); text-decoration: none; font-weight: 600;
+            transition: color 0.2s;
+        }
+        .login-footer a:hover { color: var(--accent-hover); }
+
+        /* Security badge */
+        .security-badge {
+            text-align: center; margin-top: 24px;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            color: var(--text-muted); font-size: 11px;
+        }
+        .security-badge i { color: var(--green); font-size: 12px; }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-card { padding: 36px 24px; border-radius: 20px; }
+            .sso-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <div class="brand">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <h1>TalentNexus <span>AI</span></h1>
+                <p>Enterprise Recruitment Intelligence Platform</p>
+            </div>
+
+            <form id="login-form" action="/api/v1/auth/login" method="POST">
+                <div class="form-group">
+                    <label for="email">Work Email</label>
+                    <div class="input-wrapper">
+                        <input type="email" id="email" name="email" class="form-input" placeholder="you@company.com" required>
+                        <i class="fa-solid fa-envelope"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" name="password" class="form-input" placeholder="Enter your password" required>
+                        <i class="fa-solid fa-lock"></i>
+                        <button type="button" class="toggle-password" onclick="togglePassword()">
+                            <i class="fa-solid fa-eye" id="eye-icon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember"> Remember me
+                    </label>
+                    <a href="#" class="forgot-link">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn-login">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                    Sign In to Workspace
+                </button>
+            </form>
+
+            <div class="divider"><span>or continue with</span></div>
+
+            <div class="sso-grid">
+                <button class="btn-sso" type="button">
+                    <i class="fa-brands fa-google"></i> Google SSO
+                </button>
+                <button class="btn-sso" type="button">
+                    <i class="fa-brands fa-microsoft"></i> Microsoft
+                </button>
+            </div>
+
+            <div class="login-footer">
+                <p>Don't have an account? <a href="/register">Create organization</a></p>
+            </div>
+
+            <div class="security-badge">
+                <i class="fa-solid fa-shield-check"></i>
+                Protected by AES-256 encryption &bull; SOC 2 Compliant
+            </div>
         </div>
-        <form id="login-form" class="auth-form">
-            <div class="form-group">
-                <label for="email">Work Email</label>
-                <input type="email" id="email" class="form-input" placeholder="recruiter@enterprise.com" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" class="form-input" placeholder="••••••••" required>
-            </div>
-            <div class="form-group">
-                <label for="two_factor">2FA Authenticator Code (Optional)</label>
-                <input type="text" id="two_factor" class="form-input" placeholder="6-digit code">
-            </div>
-            <button type="submit" class="btn btn-primary btn-block">Sign In to Workspace</button>
-            <div class="auth-footer">
-                <a href="/register">Create new organization account</a> • <a href="#">Forgot password?</a>
-            </div>
-        </form>
     </div>
-</div>
-{% endblock %}
+
+    <script>
+        function togglePassword() {
+            const pwd = document.getElementById('password');
+            const icon = document.getElementById('eye-icon');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                pwd.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // For local demo, just redirect to dashboard
+            if (email && password) {
+                window.location.href = '/';
+            }
+        });
+    </script>
+</body>
+</html>
