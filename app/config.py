@@ -22,9 +22,18 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     DEBUG = False
     # Use real secret in production
+
+class LocalConfig(Config):
+    """Lightweight local config - SQLite, no Redis/Celery needed."""
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///talentnexus_local.db'
+    REDIS_URL = ''
+    CELERY_BROKER_URL = 'memory://'
+    CELERY_RESULT_BACKEND = 'cache+memory://'
     
 config_by_name = dict(
     dev=DevelopmentConfig,
     test=TestingConfig,
-    prod=ProductionConfig
+    prod=ProductionConfig,
+    local=LocalConfig
 )
