@@ -1,7 +1,16 @@
 import logging
-from sentence_transformers import SentenceTransformer
-import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
+
+try:
+    from sentence_transformers import SentenceTransformer
+    import numpy as np
+    from sklearn.metrics.pairwise import cosine_similarity
+    _ML_AVAILABLE = True
+except ImportError:
+    _ML_AVAILABLE = False
+    SentenceTransformer = None
+    np = None
+    cosine_similarity = None
+    logging.warning("ML libraries (sentence-transformers/torch) not installed. Matching engine will use fallback mode.")
 
 logger = logging.getLogger(__name__)
 

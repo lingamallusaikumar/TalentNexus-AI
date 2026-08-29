@@ -17,9 +17,16 @@ def create_app(config_name=None):
     
     init_celery(app, celery)
     
-    from app.realtime.socketio import socketio
-    redis_url = app.config.get('REDIS_URL', 'redis://localhost:6379/0')
-    socketio.init_app(app, message_queue=redis_url)
+    # SocketIO - skip Redis message queue in local mode
+    try:
+        from app.realtime.socketio import socketio
+        redis_url = app.config.get('REDIS_URL', '')
+        if redis_url:
+            socketio.init_app(app, message_queue=redis_url)
+        else:
+            socketio.init_app(app)
+    except Exception:
+        pass
     
     # 1. Register API Blueprints
     from app.api import (

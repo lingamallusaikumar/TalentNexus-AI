@@ -1,13 +1,11 @@
-import spacy
 import logging
 
-# We will load a small model by default for extraction
-# Ensure you run: python -m spacy download en_core_web_sm
+nlp = None
 try:
+    import spacy
     nlp = spacy.load('en_core_web_sm')
-except OSError:
-    logging.warning("spaCy model 'en_core_web_sm' not found. NLP extraction will be limited.")
-    nlp = None
+except (ImportError, OSError):
+    logging.warning("spaCy not available. NLP extraction will be limited.")
 
 def extract_entities(text: str):
     if not nlp:
