@@ -1,7 +1,6 @@
 venv/
 __pycache__/
 *.pyc
-.env
 .pytest_cache/
 htmlcov/
 dist/
@@ -10,3 +9,12 @@ build/
 .idea/
 .vscode/
 *.log
+instance/
+
+# Environment files - NEVER commit secrets
+.env
+.env.*
+*.env
+.env.local
+.env.production
+.env.staging
